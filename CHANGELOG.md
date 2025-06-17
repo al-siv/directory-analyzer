@@ -13,9 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for parallel and sequential directory scanning
 - Multiple output formats: text, CSV, and JSON
 - Comprehensive error handling with user-friendly messages
-- Progress reporting for long-running scans
+- Verbose logging output (basic scan status and error reporting)
 - Configurable options: min size threshold, hidden directories, output file
-- Cross-platform support (Windows, macOS, Linux)
+- Tested on Windows (other platforms not yet tested)
 - MIT License
 - Comprehensive documentation and architecture guides
 
@@ -24,41 +24,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Performance**: Optional multi-threaded scanning for improved speed
 - **Flexibility**: Customizable output formats and filtering options
 - **Reliability**: Robust error handling for permissions and file system issues
-- **User Experience**: Clean CLI interface with progress reporting
+- **User Experience**: Clean CLI interface with verbose logging
 
 ### Technical Details
-- Written in Python 3.13
+- Written in Python 3.13 (only tested version)
 - Uses only standard library (no external dependencies)
 - Modular architecture with clear separation of concerns
 - Full type hints and comprehensive documentation
-- Extensive testing coverage
+- Tested on Windows platform
 
-## [Unreleased]
+---
 
-### Planned
-- Package for PyPI distribution
-- Enhanced progress bars with `tqdm`
-- Colored output support
-- Configuration file support
-- Additional output formats (XML, YAML)
-- Performance optimizations for very large filesystems
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+*The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).*
 
 ## [1.0.0] - 2025-06-17
 
 ### Added
 - Initial release of Directory Analyzer
 - Command-line utility for finding largest directories by direct file size
-- Support for parallel and sequential scanning modes
+- Support for parallel and sequential directory scanning
 - Multiple output formats: text, CSV, and JSON
 - Comprehensive error handling with user-friendly messages
-- Progress reporting for long-running scans
-- Configurable options for hidden directories, minimum size thresholds
-- Cross-platform support (Windows, macOS, Linux)
-- Detailed documentation and examples
-- MIT License for open source usage
+- Verbose logging output (basic scan status and error reporting)
+- Configurable options: min size threshold, hidden directories, output file
+- Tested on Windows (other platforms not yet tested)
+- MIT License
+- Comprehensive documentation and architecture guides
 
 ### Features
 - **Smart Directory Scanning**: Analyzes only direct files in each directory (not subdirectories)
@@ -68,15 +60,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Multiple Formats**: Text, CSV, and JSON output formats
 - **Progress Tracking**: Optional verbose mode with real-time progress updates
 - **Filtering Options**: Minimum size thresholds and hidden directory inclusion
-- **Cross-Platform**: Works on Windows, macOS, and Linux
+- **Tested Platform**: Currently tested on Windows (should work on macOS and Linux)
 
 ### Technical Details
-- Python 3.11+ support
+- Python 3.13 (only tested version)
 - Zero external dependencies (uses only Python standard library)
 - Modular architecture with clear separation of concerns
 - Comprehensive type hints and documentation
-- Full test coverage of core functionality
-- Follows Python packaging best practices
+- Tested on Windows platform
 
 ### Documentation
 - Complete README with usage examples

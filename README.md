@@ -11,9 +11,9 @@ A command-line utility to find the largest directories on your disk by analyzing
 - **Smart Scanning**: Analyzes only direct files in each directory, not subdirectories
 - **Parallel Processing**: Optional multi-threaded scanning for improved performance  
 - **Multiple Output Formats**: Text, CSV, and JSON output support
-- **Flexible Results**: Top 50 in terminal, full list saved to file
+- **Flexible Results**: Top N (default 50, configurable) in terminal, full list saved to file
 - **Robust Error Handling**: Gracefully handles permission errors and inaccessible directories
-- **Progress Tracking**: Optional verbose mode with progress reporting
+- **Verbose Logging**: Optional verbose mode with scan status logging
 
 ## Installation
 
@@ -43,7 +43,7 @@ directory-analyzer /path/to/scan
 
 ### Requirements
 
-- Python 3.11 or higher
+- Python 3.13 (only tested version, may work on 3.11+ but not verified)
 - No external dependencies (uses only Python standard library)
 
 ## Usage
@@ -70,7 +70,7 @@ python directory_analyzer.py C:\ --output-file results.csv --format csv --top-co
 - `--include-hidden`: Include hidden directories in scan
 - `--min-size`: Minimum size in bytes to include in results
 - `--format`: Output format - text, csv, or json (default: text)
-- `--verbose, -v`: Enable verbose output with progress reporting
+- `--verbose, -v`: Enable verbose output with scan status logging
 - `--no-parallel`: Disable parallel scanning (use sequential mode)
 
 ### Examples
@@ -143,7 +143,7 @@ Rank,Path,Size (bytes),Size (HR),File Count
 - **Sequential Mode**: Processes directories one by one (safer for network drives)
 - **Parallel Mode**: Uses multiple threads for faster scanning (default)
 - **Memory Efficient**: Uses generators and iterators to minimize memory usage
-- **Progress Reporting**: Shows progress for long-running scans
+- **Verbose Logging**: Shows scan status and error information
 
 ## Architecture
 

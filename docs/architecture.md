@@ -1,29 +1,33 @@
 # Directory Analyzer - Technical Architecture
 
 ## Overview
-A command-line utility for analyzing directory sizes on a filesystem, focusing on direct file content rather than recursive subdirectory sizes. Built with Python 3.13 for cross-platform compatibility with Windows-specific optimizations.
+A command-line utility for analyzing directory sizes on a filesystem, focusing on direct file content rather than recursive subdirectory sizes. Built with Python 3.13 and tested on Windows platform.
 
 ## Core Requirements
 - Calculate directory sizes based only on direct files (not subdirectories)
-- Output complete results to file and top 50 to terminal
+- Output complete results to file and top N to terminal
 - Handle large filesystem scans efficiently
 - Provide robust error handling for permission issues
 
 ## Technology Stack
 
-### Core Technologies
-- **Python 3.13**: Latest Python version with performance improvements
-- **Standard Library**: Minimal external dependencies for maximum compatibility
-  - `pathlib`: Modern path handling
-  - `argparse`: Command-line interface
-  - `os`: Low-level filesystem operations
-  - `concurrent.futures`: Parallel processing
-  - `dataclasses`: Clean data structures
-  - `logging`: Debugging and progress tracking
+### Tested Environment
+- **Python 3.13**: Developed and tested version
+- **Windows Platform**: Primary testing environment
+- **Standard Library Only**: No external dependencies for maximum compatibility
 
-### Optional Dependencies
-- `rich`: Enhanced terminal output (future enhancement)
-- `tqdm`: Progress bars for long operations (future enhancement)
+### Core Technologies
+- **pathlib**: Modern path handling and filesystem operations
+- **argparse**: Command-line interface and argument parsing
+- **os**: Low-level filesystem operations and Windows-specific features
+- **concurrent.futures**: Optional parallel processing with ThreadPoolExecutor
+- **dataclasses**: Clean data structures for type safety
+- **logging**: Basic scan status and error reporting
+- **json/csv**: Built-in output format support
+
+### Future Dependencies (Planned)
+- `rich`: Enhanced terminal output with colors and formatting
+- `tqdm`: Progress bars for long operations
 - `click`: Advanced CLI features (alternative to argparse)
 
 ## Architecture Patterns
@@ -32,18 +36,45 @@ A command-line utility for analyzing directory sizes on a filesystem, focusing o
 ```
 ├── CLI Layer (main.py)           # User interface and argument parsing
 ├── Business Logic Layer
-│   ├── scanner.py               # Directory traversal logic
-│   ├── calculator.py            # Size calculation algorithms
+│   ├── scanner.py               # Directory traversal and parallel processing
+│   ├── models.py                # Data structures and business entities
 │   └── reporter.py              # Output formatting and file I/O
 └── Utility Layer (utils.py)     # Common helpers and error handling
 ```
 
 ### Design Patterns Applied
-1. **Repository Pattern**: Abstract data access for directory information
-2. **Strategy Pattern**: Multiple output formats (text, CSV, JSON)
-3. **Observer Pattern**: Progress reporting during scans
-4. **Factory Pattern**: OS-specific scanner implementations
-5. **Command Pattern**: Encapsulate scanning operations
+1. **Dataclass Pattern**: Type-safe data structures (DirectoryInfo, ScanOptions, ScanResult)
+2. **Strategy Pattern**: Multiple output formats (text, CSV, JSON) via reporter
+3. **Template Method Pattern**: Sequential vs parallel scanning implementations
+4. **Builder Pattern**: ScanResult construction with computed properties
+5. **Iterator Pattern**: Lazy evaluation for directory traversal
+
+### Core Modules and Dependencies
+
+#### Module Structure
+- **src/__init__.py**: Package initialization with version and author info
+- **src/main.py**: CLI entry point and workflow orchestration
+- **src/models.py**: Business data models with type safety
+- **src/scanner.py**: Core scanning logic (sequential and parallel)
+- **src/reporter.py**: Output formatting and file writing
+- **src/utils.py**: Shared utilities and error handling
+
+#### Actual Dependencies (Standard Library Only)
+- **pathlib**: Modern filesystem path operations and cross-platform compatibility
+- **argparse**: Command-line interface with type validation
+- **concurrent.futures**: ThreadPoolExecutor for parallel directory processing
+- **dataclasses**: Type-safe data structures with automatic methods
+- **logging**: Structured logging for debugging and verbose output
+- **datetime**: Timestamp tracking for scan operations
+- **json**: JSON output format support
+- **csv**: CSV output format support
+- **os**: Low-level filesystem operations (Windows-specific features)
+- **typing**: Type hints for better code clarity and IDE support
+
+#### Testing Status
+- **Current**: No automated tests implemented
+- **Planned**: Unit tests for core functionality, integration tests for CLI
+- **Manual Testing**: Extensive manual testing on Windows platform
 
 ## Data Structures
 
