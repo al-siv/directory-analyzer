@@ -8,12 +8,12 @@ A command-line utility to find the largest directories on your disk by analyzing
 
 ## Features
 
-- 🔍 **Smart Scanning**: Analyzes only direct files in each directory, not subdirectories
-- 🚀 **Parallel Processing**: Optional multi-threaded scanning for improved performance  
-- 📊 **Multiple Output Formats**: Text, CSV, and JSON output support
-- 📋 **Flexible Results**: Top 50 in terminal, full list saved to file
-- 🛡️ **Robust Error Handling**: Gracefully handles permission errors and inaccessible directories
-- 📈 **Progress Tracking**: Optional verbose mode with progress reporting
+- **Smart Scanning**: Analyzes only direct files in each directory, not subdirectories
+- **Parallel Processing**: Optional multi-threaded scanning for improved performance  
+- **Multiple Output Formats**: Text, CSV, and JSON output support
+- **Flexible Results**: Top 50 in terminal, full list saved to file
+- **Robust Error Handling**: Gracefully handles permission errors and inaccessible directories
+- **Progress Tracking**: Optional verbose mode with progress reporting
 
 ## Installation
 
