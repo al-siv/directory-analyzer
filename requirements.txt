@@ -1,0 +1,16 @@
+# Directory Analyzer - Core Requirements
+
+# No external dependencies required for core functionality
+# The application uses only Python standard library
+
+# Optional dependencies (install with: pip install directory-analyzer[enhanced])
+# tqdm>=4.0          # For enhanced progress bars
+# rich>=10.0         # For colored terminal output
+# colorama>=0.4.0    # For Windows color support
+
+# Development dependencies (install with: pip install directory-analyzer[dev])
+# pytest>=6.0        # For running tests
+# pytest-cov        # For test coverage
+# black             # For code formatting
+# flake8            # For linting
+# mypy              # For type checking
