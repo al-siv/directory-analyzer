@@ -1,0 +1,28 @@
+"""Constants used throughout the Directory Analyzer application."""
+
+# Size conversion constants
+BYTES_PER_KB = 1024.0
+MINIMUM_PERCENTAGE_DISPLAY = 0.01
+
+# Progress reporting constants
+PROGRESS_UPDATE_FREQUENCY = 1000  # Update progress every N items
+PROGRESS_PERCENTAGE_INTERVAL = 5  # Report progress every 5%
+
+# Test constants
+TEST_FILE_SIZE_SMALL = 1000
+TEST_FILE_SIZE_MEDIUM = 2000
+TEST_FILE_SIZE_LARGE = 5000
+TEST_FILE_SIZE_EXTRA_LARGE = 8000
+TEST_FILE_SIZE_HUGE = 10000
+TEST_FILE_COUNT_SINGLE = 1
+TEST_FILE_COUNT_PAIR = 2
+TEST_SIZE_THRESHOLD = 4000
+TEST_STATISTICS_DURATION = 1.5
+
+# Scanner constants
+COMPLEXITY_THRESHOLD = 10
+MAX_BRANCHES = 12
+MAX_STATEMENTS = 50
+
+# Performance constants
+PERFORMANCE_MAX_WORKERS = 8

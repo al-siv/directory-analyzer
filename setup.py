@@ -3,22 +3,27 @@
 Setup script for Directory Analyzer.
 """
 
-from setuptools import setup, find_packages
 from pathlib import Path
+
+from setuptools import find_packages, setup
 
 # Read the README file
 this_directory = Path(__file__).parent
-long_description = (this_directory / "README.md").read_text(encoding='utf-8')
+long_description = (this_directory / "README.md").read_text(encoding="utf-8")
 
 setup(
     name="directory-analyzer",
-    version="1.0.0",
-    author="Your Name",  # Replace with your name
-    author_email="your.email@example.com",  # Replace with your email
-    description="A command-line utility to find the largest directories by direct file size",
+    version="1.2.1",
+    author="Alexander Sivolobov",
+    author_email="alexander.sivolobov@example.com",
+    description=(
+        "A command-line utility to find the largest directories by direct file size"
+    ),
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/directory-analyzer",  # Replace with your GitHub URL
+    url=(
+        "https://github.com/yourusername/directory-analyzer"
+    ),  # Replace with your GitHub URL
     packages=find_packages(),
     classifiers=[
         "Development Status :: 5 - Production/Stable",
