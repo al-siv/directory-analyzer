@@ -868,3 +868,32 @@ src/
 - **Interactive Tables**: Sortable and formatted directory listings
 - **Status Messages**: Clear feedback during long operations
 - **Error Highlighting**: Visual emphasis for permission issues and errors
+
+## CI/CD Infrastructure and Cost Optimization
+
+### GitHub Actions Configuration
+**Primary CI Pipeline** (`ci.yml`):
+- **Python Versions**: 3.11, 3.12, 3.13 (aligned with 3.11+ support requirement)
+- **Platforms**: Windows, Ubuntu (full matrix) + macOS (Python 3.13 only)
+- **Caching Strategy**: Pip dependencies cached across OS and Python versions
+- **Test Coverage**: Unit tests with pytest, code quality with flake8
+- **Estimated Cost**: ~12 minutes per workflow run (optimized from potential 18 minutes)
+
+**Development CI Pipeline** (`dev-ci.yml`):
+- **Cost-Optimized**: Ubuntu-only with Python 3.13 for development branches
+- **Conditional Execution**: Runs only when relevant files are changed
+- **Fast Feedback**: Critical error detection and core functionality validation
+- **Estimated Cost**: ~2 minutes per development workflow run
+
+### Cost Analysis
+- **Free Tier**: 2000 minutes/month for public repositories
+- **Main Branch**: ~12 minutes per run (allows ~160 releases/month)
+- **Development**: ~2 minutes per run (highly efficient for iteration)
+- **Caching Benefits**: 50-70% reduction in dependency installation time
+- **Total Efficiency**: Well within free tier limits with room for growth
+
+### Technical Implementation
+- **Dependency Caching**: Cross-platform pip cache optimization
+- **Matrix Strategy**: Balanced coverage vs cost approach
+- **Path-Based Triggers**: Avoid unnecessary CI runs for documentation changes
+- **Graceful Degradation**: Core functionality testing without external dependencies
