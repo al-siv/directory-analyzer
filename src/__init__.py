@@ -4,7 +4,7 @@ Directory Analyzer - A utility for finding the largest directories by direct fil
 Author: Alexander Sivolobov
 """
 
-__version__ = "1.0.0"
+__version__ = "1.2.1"
 __author__ = "Alexander Sivolobov"
 
 from .models import DirectoryInfo, ScanOptions, ScanResult
