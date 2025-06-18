@@ -21,12 +21,19 @@ A command-line utility for intelligent personal storage management, helping powe
 - **Advanced Filtering**: Extension filtering, size filtering, hidden directory control ✅
 - **Professional Output**: Multiple formats (text, CSV, JSON) with percentage analysis ✅
 
-### Next Phase (v1.3.0+)
-- **Enhanced User Experience**: Color-coded terminal output with rich formatting
-- **Storage Recommendations**: Suggest cloud migration, archival, or deletion candidates
-- **Age Analysis**: Factor creation and modification dates into recommendations  
-- **Interactive Mode**: User-guided cleanup decisions
+### Next Phase (v1.3.0) - Enhanced User Experience
+- **Rich Terminal Integration**: Color-coded output with progress indicators using Rich library
+- **Interactive Mode**: User-guided cleanup decisions with real-time feedback
+- **Visual Progress Tracking**: Progress bars for large scans and status spinners
+- **Enhanced Table Output**: Professional formatting with Rich's table system
+- **Smart Recommendations**: Suggest cloud migration, archival, or deletion candidates
+- **Age Analysis**: Factor creation and modification dates into recommendations
+- **Improved Error Handling**: Better error messages with contextual help
+
+### Future Phases (v1.4.0+)
 - **Performance Optimizations**: Database caching and incremental updates
+- **Extended Platform Support**: Android filesystem analysis (via Termux)
+- **Network Drive Integration**: Optimized scanning for network storage
 
 ## Technology Stack
 
@@ -47,7 +54,13 @@ A command-line utility for intelligent personal storage management, helping powe
 - **mimetypes**: File type detection and classification
 - **stat**: File metadata analysis (size, timestamps, permissions)
 
-### Planned Dependencies (v2.0+)
+### Planned Dependencies (v1.3.0)
+- **Rich**: Terminal formatting and user experience enhancement
+  - Color-coded output with progress indicators
+  - Interactive tables and status displays
+  - Cross-platform terminal compatibility
+  - Graceful fallback to standard output if unavailable
+- **Optional Enhanced Features**: Maintain core functionality without dependencies
 - **Optional Enhancement Libraries** (maintain zero-dependency core):
   - `rich`: Color terminal output and enhanced formatting
   - `colorama`: Cross-platform terminal color support (Windows compatibility)
@@ -398,7 +411,8 @@ directory_analyzer/
 │   ├── models.py            # Data structures (DirectoryInfo, ScanOptions, ScanResult)
 │   ├── scanner.py           # Directory scanning and size calculation logic
 │   ├── utils.py             # Utility functions and progress reporting
-│   └── reporter.py          # Output formatting and file writing
+│   ├── reporter.py          # Output formatting and file writing
+│   └── rich_output.py       # NEW: Rich terminal interface module
 ├── tests/
 │   └── __init__.py          # Test package initialization
 ├── directory_analyzer.py   # Main entry point script
@@ -413,6 +427,7 @@ directory_analyzer/
 - **src/scanner.py**: Filesystem traversal and directory size calculation logic.
 - **src/utils.py**: Utility functions (size formatting, error handling, progress reporting).
 - **src/reporter.py**: Output formatting and writing results to file/terminal.
+- **src/rich_output.py**: Centralizes all Rich-based terminal enhancements.
 - **tests/**: Unit and integration tests for all modules.
 
 ## Core Algorithm
@@ -815,3 +830,41 @@ tests/
 - **Lazy Evaluation**: Generate statistics on-demand for large datasets
 - **Caching Strategy**: Cache classification results for repeated scans
 - **Progress Reporting**: Enhanced progress tracking for long operations
+
+## V1.3.0 Architecture Evolution
+
+### Enhanced Module Structure
+```
+src/
+├── __init__.py             # Version 1.3.0 with Rich integration
+├── main.py                 # Enhanced CLI with progress tracking
+├── scanner.py              # Core scanning logic (unchanged)
+├── classifier.py           # Content classification (unchanged)
+├── models.py               # Data structures (unchanged)
+├── reporter.py             # Enhanced with Rich table formatting
+├── utils.py                # Utility functions (unchanged)
+├── constants.py            # File type definitions (unchanged)
+└── rich_output.py          # NEW: Rich terminal interface module
+```
+
+### New Rich Integration Module
+**rich_output.py** - Centralizes all Rich-based terminal enhancements:
+- **RichConsole**: Wrapper for Rich Console with fallback to standard output
+- **ProgressTracker**: Progress bars for directory scanning operations
+- **StatusDisplay**: Dynamic status indicators during processing
+- **TableFormatter**: Enhanced table output for directory statistics
+- **ColorSchemes**: Predefined color schemes for different content types
+- **InteractivePrompts**: User input handling with Rich styling
+
+### Module Integration Strategy
+- **Backward Compatibility**: All modules maintain standard output fallback
+- **Optional Enhancement**: Rich features activate only when library is available
+- **Graceful Degradation**: Core functionality works without Rich dependency
+- **Configuration**: Environment variable to disable Rich output if needed
+
+### Enhanced Reporter Features
+- **Color-Coded Categories**: Different colors for each content type
+- **Progress Indicators**: Real-time scan progress with file counts
+- **Interactive Tables**: Sortable and formatted directory listings
+- **Status Messages**: Clear feedback during long operations
+- **Error Highlighting**: Visual emphasis for permission issues and errors

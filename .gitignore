@@ -134,6 +134,7 @@ test_results.*
 *.csv
 *.json
 output_*.txt
+no-access.txt
 
 # IDE
 .vscode/
