@@ -1,6 +1,0 @@
-# Directory Analyzer - Inaccessible Directories
-# Generated: 2025-06-18 19:14:50
-# Total inaccessible directories: 2
-
-C:\Program Files (x86)\Incredibuild\FileCache
-C:\Program Files (x86)\Incredibuild\ModuleCache
