@@ -23,6 +23,24 @@ function makeScanResult(format: ScanOptions['outputFormat']): ScanResult {
       fileCount: 2,
       lastScanned: Date.now(),
       errorMessage: null,
+      files: [
+        {
+          path: '/test/photos/a.jpg',
+          sizeBytes: 2000,
+          extension: '.jpg',
+          category: 'images',
+          mimeType: null,
+        },
+        {
+          path: '/test/photos/b.jpg',
+          sizeBytes: 3000,
+          extension: '.jpg',
+          category: 'images',
+          mimeType: null,
+        },
+      ],
+      categoryBreakdown: { images: 5000 },
+      dominantCategory: 'images',
     },
     {
       path: '/test/videos',
@@ -30,6 +48,17 @@ function makeScanResult(format: ScanOptions['outputFormat']): ScanResult {
       fileCount: 1,
       lastScanned: Date.now(),
       errorMessage: null,
+      files: [
+        {
+          path: '/test/videos/a.mp4',
+          sizeBytes: 10000,
+          extension: '.mp4',
+          category: 'videos',
+          mimeType: null,
+        },
+      ],
+      categoryBreakdown: { videos: 10000 },
+      dominantCategory: 'videos',
     },
   ];
 
@@ -46,6 +75,7 @@ function makeScanResult(format: ScanOptions['outputFormat']): ScanResult {
     directories: dirs,
     totalScanned: 2,
     errorCount: 0,
+    accessErrors: [],
     scanDuration: 1.23,
     scanOptions: options,
     statistics: stats,

@@ -42,15 +42,6 @@ export type ScanOptionsInput = z.input<typeof ScanOptionsSchema>;
 /** Validates export output format. */
 export const OutputFormatSchema = z.enum(['text', 'csv', 'json']);
 
-/** Validates a single {@link DirectoryInfo} object. */
-export const DirectoryInfoSchema = z.object({
-  path: z.string().min(1),
-  sizeBytes: z.number().int().min(0),
-  fileCount: z.number().int().min(0),
-  lastScanned: z.number().int().min(0),
-  errorMessage: z.string().nullable(),
-});
-
 /** Validates a single {@link FileInfo} object. */
 export const FileInfoSchema = z.object({
   path: z.string().min(1),
@@ -58,6 +49,18 @@ export const FileInfoSchema = z.object({
   extension: z.string(),
   category: z.string(),
   mimeType: z.string().nullable(),
+});
+
+/** Validates a single {@link DirectoryInfo} object. */
+export const DirectoryInfoSchema = z.object({
+  path: z.string().min(1),
+  sizeBytes: z.number().int().min(0),
+  fileCount: z.number().int().min(0),
+  lastScanned: z.number().int().min(0),
+  errorMessage: z.string().nullable(),
+  files: z.array(FileInfoSchema),
+  categoryBreakdown: z.record(z.string(), z.number()),
+  dominantCategory: z.string().nullable(),
 });
 
 /** Validates {@link ScanStatistics}. */
@@ -75,6 +78,7 @@ export const ScanResultSchema = z.object({
   directories: z.array(DirectoryInfoSchema),
   totalScanned: z.number().int().min(0),
   errorCount: z.number().int().min(0),
+  accessErrors: z.array(z.string()),
   scanDuration: z.number().min(0),
   scanOptions: ScanOptionsSchema,
   statistics: ScanStatisticsSchema,

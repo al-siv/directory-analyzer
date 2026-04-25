@@ -1,11 +1,12 @@
-import { defineConfig } from 'vitest/config'
-import { resolve } from 'path'
+import { defineConfig } from 'vitest/config';
+import { resolve } from 'path';
 
 export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    include: ['tests/unit/**/*.spec.ts', 'src/**/*.spec.ts'],
+    include: ['tests/unit/**/*.spec.ts', 'tests/renderer/**/*.spec.ts', 'src/**/*.spec.ts'],
+    setupFiles: ['./tests/setup.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
@@ -15,15 +16,15 @@ export default defineConfig({
       thresholds: {
         lines: 80,
         functions: 80,
-        branches: 70,
-        statements: 80
-      }
-    }
+        branches: 80,
+        statements: 80,
+      },
+    },
   },
   resolve: {
     alias: {
       '@shared': resolve(__dirname, 'src/shared'),
-      '@main': resolve(__dirname, 'src/main')
-    }
-  }
-})
+      '@main': resolve(__dirname, 'src/main'),
+    },
+  },
+});

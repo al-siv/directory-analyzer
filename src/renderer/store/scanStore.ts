@@ -1,6 +1,10 @@
 /**
  * Global UI state managed by Zustand.
  *
+ * @description Holds scan lifecycle state, UI preferences, and
+ *              selected directory. Persists theme and filter
+ *              preferences to localStorage via Zustand middleware.
+ *
  * @module renderer/store/scanStore
  */
 
@@ -22,6 +26,7 @@ interface ScanStore {
   extensions: string;
   theme: 'dark' | 'light';
   selectedDirectoryPath: string | null;
+  showAccessErrors: boolean;
 
   setAppState: (state: AppState) => void;
   setScanResult: (result: ScanResult | null) => void;
@@ -34,6 +39,7 @@ interface ScanStore {
   setExtensions: (val: string) => void;
   setTheme: (theme: 'dark' | 'light') => void;
   setSelectedDirectoryPath: (path: string | null) => void;
+  setShowAccessErrors: (val: boolean) => void;
   reset: () => void;
 }
 
@@ -49,6 +55,7 @@ const initialState = {
   extensions: '',
   theme: 'dark' as const,
   selectedDirectoryPath: null,
+  showAccessErrors: false,
 };
 
 function clampNumber(value: unknown, min: number, max: number, fallback: number): number {
@@ -57,6 +64,15 @@ function clampNumber(value: unknown, min: number, max: number, fallback: number)
   return Math.max(min, Math.min(max, num));
 }
 
+/**
+ * React hook to access the global scan store.
+ *
+ * @description Provides read/write access to scan state, progress,
+ *              results, and UI preferences. Theme and filter settings
+ *              are automatically persisted to localStorage.
+ *
+ * @returns Zustand store bound to the ScanStore interface.
+ */
 export const useScanStore = create<ScanStore>()(
   persist(
     set => ({
@@ -95,6 +111,9 @@ export const useScanStore = create<ScanStore>()(
       },
       setSelectedDirectoryPath: (selectedDirectoryPath: string | null): void => {
         set({ selectedDirectoryPath });
+      },
+      setShowAccessErrors: (showAccessErrors: boolean): void => {
+        set({ showAccessErrors });
       },
       reset: (): void => {
         set({

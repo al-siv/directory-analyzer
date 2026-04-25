@@ -1,3 +1,13 @@
+import type { JSX } from 'react';
+/**
+ * Pie and bar charts for content category breakdown.
+ *
+ * @description Visualizes scan results by file category using Recharts.
+ *              Supports toggling between pie and bar views.
+ *
+ * @module renderer/components/CategoryChart
+ */
+
 import { useScanStore } from '@renderer/store/scanStore';
 import { useMemo, useState } from 'react';
 import {
@@ -25,7 +35,7 @@ const COLORS: Record<string, string> = {
   other: '#9ca3af',
 };
 
-export function CategoryChart() {
+export function CategoryChart(): JSX.Element {
   const scanResult = useScanStore(s => s.scanResult);
   const [view, setView] = useState<'pie' | 'bar'>('pie');
 
@@ -58,13 +68,17 @@ export function CategoryChart() {
         <h3 className="text-sm font-semibold">Content Breakdown</h3>
         <div className="flex gap-1">
           <button
-            onClick={() => { setView('pie'); }}
+            onClick={() => {
+              setView('pie');
+            }}
             className={`rounded px-2 py-0.5 text-xs ${view === 'pie' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' : 'text-slate-500'}`}
           >
             Pie
           </button>
           <button
-            onClick={() => { setView('bar'); }}
+            onClick={() => {
+              setView('bar');
+            }}
             className={`rounded px-2 py-0.5 text-xs ${view === 'bar' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' : 'text-slate-500'}`}
           >
             Bar
@@ -93,7 +107,7 @@ export function CategoryChart() {
                 ))}
               </Pie>
               <Tooltip
-                formatter={(value) => [`${(Number(value) / 1024 / 1024).toFixed(1)} MB`, 'Size']}
+                formatter={value => [`${(Number(value) / 1024 / 1024).toFixed(1)} MB`, 'Size']}
               />
             </PieChart>
           ) : (
@@ -102,7 +116,7 @@ export function CategoryChart() {
               <XAxis type="number" hide />
               <YAxis dataKey="name" type="category" width={80} tick={{ fontSize: 12 }} />
               <Tooltip
-                formatter={(value) => [`${(Number(value) / 1024 / 1024).toFixed(1)} MB`, 'Size']}
+                formatter={value => [`${(Number(value) / 1024 / 1024).toFixed(1)} MB`, 'Size']}
               />
               <Bar dataKey="value">
                 {data.map((entry, index) => (

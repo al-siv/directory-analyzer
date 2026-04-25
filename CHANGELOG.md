@@ -9,14 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Migrated — TypeScript + Electron Desktop Application
 - **Complete rewrite** from Python CLI to cross-platform Electron desktop app
-- **Stack**: TypeScript 5.5 (strict), Electron 33, React 18, Vite, Tailwind CSS, Zustand, Recharts
+- **Stack**: TypeScript 6 (strict), Electron 41, React 19, Vite, Tailwind CSS 4, Zustand, Recharts
 - **UI replaces CLI**: folder picker, real-time progress, sortable table, pie/bar charts, export panel, dark/light theme
 
 ### Security
 - `contextIsolation: true`, `contextBridge` only, no `nodeIntegration`
 - All paths validated in IPC handlers before filesystem access
 - Read-only scanning; export writes only to native save dialog results
-- ESLint security plugins (`eslint-plugin-security`, `eslint-plugin-security-node`)
+- ESLint security plugin (`eslint-plugin-security`)
 
 ### Quality
 - Strict TypeScript (`strict: true`, `no-explicit-any` in core)
@@ -29,7 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.2.1] - 2025-06-18
+## [1.2.1] - 2025-01-18
 
 ### Fixed
 - **🐛 Critical Bug Fixes**
@@ -144,7 +144,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Cross-Platform**: Honest documentation about actual testing vs. theoretical support
 - **Progress Reporting**: Clarified that verbose mode provides status updates, not true progress bars
 
-## [1.0.0] - 2025-06-17
+## [1.0.0] - 2024-06-17
 
 ### Added - Initial Release
 - **Core Functionality**: Command-line utility for finding largest directories by direct file size

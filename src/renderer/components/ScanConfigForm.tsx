@@ -1,9 +1,20 @@
+import type { JSX } from 'react';
+/**
+ * Scan configuration form.
+ *
+ * @description Provides directory picker, filter toggles, and scan
+ *              start/cancel controls. Reads and writes scan options
+ *              to the global Zustand store.
+ *
+ * @module renderer/components/ScanConfigForm
+ */
+
 import { useScanStore } from '@renderer/store/scanStore';
 import { useScan } from '@renderer/hooks/useScan';
 import { FolderOpen, Play, Square, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 
-export function ScanConfigForm() {
+export function ScanConfigForm(): JSX.Element {
   const { startScan, cancelScan } = useScan();
   const [showFilters, setShowFilters] = useState(false);
 

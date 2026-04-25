@@ -18,6 +18,9 @@ no-access.txt
 .DS_Store
 Thumbs.db
 
+# LLM audit reports (generated, not source)
+analysis/
+
 # =============================================================================
 # ARCHIVE — Python legacy code (preserved for regression testing, not in repo)
 # =============================================================================

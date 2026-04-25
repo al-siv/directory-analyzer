@@ -1,7 +1,17 @@
+import type { JSX } from 'react';
+/**
+ * Scan progress indicator.
+ *
+ * @description Displays a spinner, progress bar, and directory count
+ *              while a scan is in progress.
+ *
+ * @module renderer/components/ScanProgress
+ */
+
 import { useScanStore } from '@renderer/store/scanStore';
 import { Loader2 } from 'lucide-react';
 
-export function ScanProgress() {
+export function ScanProgress(): JSX.Element {
   const progress = useScanStore(s => s.progress);
 
   const current = progress?.current ?? 0;

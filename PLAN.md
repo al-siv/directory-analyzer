@@ -21,30 +21,30 @@ This document provides a detailed, actionable plan for migrating Directory Analy
 
 ### Tasks
 
-- [ ] Initialize project with `npm create electron-vite@latest`
+- [x] Initialize project with `pnpm create electron-vite@latest`
   - Choose React + TypeScript template
   - Configure for `main`, `preload`, `renderer` processes
-- [ ] Configure TypeScript
+- [x] Configure TypeScript
   - Root `tsconfig.json` with `strict: true`
   - Separate `tsconfig.node.json` for build tooling
   - Path aliases (`@shared/*`, `@main/*`, `@renderer/*`, `@preload/*`)
-- [ ] Configure Vite (`electron.vite.config.ts`)
+- [x] Configure Vite (`electron.vite.config.ts`)
   - Main process build (Node.js target)
   - Preload script build (isolated context)
   - Renderer process build (browser target)
-- [ ] Set up linting and formatting
+- [x] Set up linting and formatting
   - ESLint with TypeScript plugin (`@typescript-eslint`)
   - Prettier with consistent config
-  - Add npm scripts: `lint`, `lint:fix`, `format`
-- [ ] Set up testing
+  - Add pnpm scripts: `lint`, `lint:fix`, `format`
+- [x] Set up testing
   - Vitest for unit tests (main process logic)
   - Playwright for E2E tests
   - Configure test scripts in `package.json`
-- [ ] Set up Tailwind CSS in renderer
+- [x] Set up Tailwind CSS in renderer
   - Install Tailwind, PostCSS, Autoprefixer
   - Create `tailwind.config.js` with content paths
   - Set up base styles
-- [ ] Install runtime dependencies
+- [x] Install runtime dependencies
   - `electron` (30+)
   - `react`, `react-dom`
   - `zustand` (state management)
@@ -58,7 +58,7 @@ This document provides a detailed, actionable plan for migrating Directory Analy
 - `tsconfig.json` files with strict mode
 - `.eslintrc.json` and `.prettierrc`
 - Empty `src/` directory structure matching AGENTS.md
-- `npm run dev` starts the app in development mode
+- `pnpm run dev` starts the app in development mode
 
 ---
 
@@ -68,14 +68,14 @@ This document provides a detailed, actionable plan for migrating Directory Analy
 
 ### Tasks
 
-- [ ] Create `src/shared/constants.ts`
+- [x] Create `src/shared/constants.ts`
   - Port all constants from `src/constants.py`:
     - `BYTES_PER_KB = 1024`
     - `MINIMUM_PERCENTAGE_DISPLAY = 0.01`
     - `PROGRESS_UPDATE_FREQUENCY`
     - `PROGRESS_PERCENTAGE_INTERVAL`
     - Test constants (for unit tests)
-- [ ] Create `src/shared/types.ts`
+- [x] Create `src/shared/types.ts`
   - Port all Python dataclasses to TypeScript interfaces:
     - `DirectoryInfo`: `path`, `sizeBytes`, `fileCount`, `lastScanned`, `errorMessage?`
     - `ScanOptions`: `targetPath`, `includeHidden`, `minSizeBytes`, `outputFile`, `topCount`, `outputFormat`, `verbose`, `errorLogFile`, `extensionFilter?`
@@ -87,7 +87,7 @@ This document provides a detailed, actionable plan for migrating Directory Analy
   - Add helper types:
     - `OutputFormat = 'text' | 'csv' | 'json'`
     - `ScanProgressUpdate = { current: number; total: number; currentPath: string }`
-- [ ] Create `src/shared/ipc-channels.ts`
+- [x] Create `src/shared/ipc-channels.ts`
   - Define typed IPC channel names as constants:
     - `SCAN_START = 'scan:start'`
     - `SCAN_PROGRESS = 'scan:progress'`
@@ -111,7 +111,7 @@ This document provides a detailed, actionable plan for migrating Directory Analy
 
 ### Tasks
 
-- [ ] Create `src/main/utils/format.ts`
+- [x] Create `src/main/utils/format.ts`
   - `bytesToHumanReadable(sizeBytes: number): string` — must match Python exactly:
     - `0 B` for zero
     - `1.5 GB`, `2.0 MB` format (one decimal for non-bytes)
@@ -121,7 +121,7 @@ This document provides a detailed, actionable plan for migrating Directory Analy
     - `2.2f%` otherwise
   - `formatPathForDisplay(path: string, maxLength?: number): string`
   - Unit tests for all format functions
-- [ ] Create `src/main/utils/fs.ts`
+- [x] Create `src/main/utils/fs.ts`
   - `isHiddenDirectory(path: string): boolean`:
     - Windows: check `fs.stat` file attributes (`FILE_ATTRIBUTE_HIDDEN = 2`)
     - Unix/macOS: check dot prefix
@@ -131,12 +131,12 @@ This document provides a detailed, actionable plan for migrating Directory Analy
   - `getSubdirectories(directory: string, includeHidden: boolean): AsyncGenerator<string>`
   - `validateOutputPath(outputPath: string): string | null`
   - Unit tests with temp directories
-- [ ] Create `src/main/utils/progress.ts`
+- [x] Create `src/main/utils/progress.ts`
   - Port `ProgressReporter` class:
     - `update(count?: number): void`
     - `finish(): void`
     - Report every 5% or every 1000 items
-- [ ] Create `src/main/core/classifier.ts`
+- [x] Create `src/main/core/classifier.ts`
   - Port `ContentClassifier` class:
     - Exact `CATEGORY_MAPPINGS` from `classifier.py` (all 8 categories with full extension sets)
     - `classifyFile(filePath: string): string`
@@ -147,7 +147,7 @@ This document provides a detailed, actionable plan for migrating Directory Analy
     - `addCustomCategory(name: string, extensions: Set<string>): void`
     - `getCategoryDisplayName(category: string): string`
   - Unit tests: all classification tests from `tests/test_suite.py`
-- [ ] Create `src/main/core/scanner.ts`
+- [x] Create `src/main/core/scanner.ts`
   - Port `DirectoryScanner` class:
     - `constructor(options: ScanOptions)`
     - `scanSingleDirectory(directory: string): DirectoryInfo`
@@ -163,7 +163,7 @@ This document provides a detailed, actionable plan for migrating Directory Analy
   - Extension filtering and size filtering
   - Hidden directory control
   - Unit tests: all scanner tests from `tests/test_suite.py`
-- [ ] Create `src/main/core/exporter.ts`
+- [x] Create `src/main/core/exporter.ts`
   - Port `write_results` functionality:
     - `_writeTextResults(outputPath: string, scanResult: ScanResult)`
     - `_writeCsvResults(outputPath: string, scanResult: ScanResult)`
@@ -185,7 +185,7 @@ This document provides a detailed, actionable plan for migrating Directory Analy
 
 ### Tasks
 
-- [ ] Create `src/preload/index.ts`
+- [x] Create `src/preload/index.ts`
   - Use `contextBridge` to expose safe API:
     - `scanStart(options: ScanOptions): Promise<ScanResult>`
     - `onScanProgress(callback: (update: ScanProgressUpdate) => void): () => void`
@@ -195,7 +195,7 @@ This document provides a detailed, actionable plan for migrating Directory Analy
     - `showOpenDialog(options: OpenDialogOptions): Promise<string[] | undefined>`
   - No `nodeIntegration`, `contextIsolation: true`
   - Remove all listeners on cleanup
-- [ ] Create `src/main/ipc/handlers.ts`
+- [x] Create `src/main/ipc/handlers.ts`
   - Register IPC handlers in main process:
     - `ipcMain.handle(IPC_CHANNELS.SCAN_START, async (event, options) => { ... })`
     - Progress reporting via `event.sender.send(IPC_CHANNELS.SCAN_PROGRESS, update)`
@@ -203,10 +203,10 @@ This document provides a detailed, actionable plan for migrating Directory Analy
     - Export handler triggers native save dialog then writes file
   - Validate all paths before filesystem access (security)
   - Prevent path traversal attacks
-- [ ] Create `src/renderer/hooks/useIpc.ts`
+- [x] Create `src/renderer/hooks/useIpc.ts`
   - Typed wrapper around `window.electronAPI` (exposed by preload)
   - Handles cleanup on unmount
-- [ ] Create `src/renderer/hooks/useScan.ts`
+- [x] Create `src/renderer/hooks/useScan.ts`
   - Manages scan lifecycle:
     - `startScan(options: ScanOptions): void`
     - `cancelScan(): void`
@@ -336,7 +336,7 @@ This document provides a detailed, actionable plan for migrating Directory Analy
   - Remove or archive Python-specific setup instructions
 
 ### Deliverables
-- All tests pass (`npm test`, `npm run e2e`)
+- All tests pass (`pnpm test`, `pnpm exec playwright test`)
 - Built app runs on target platforms
 - Performance benchmark report
 - Updated documentation

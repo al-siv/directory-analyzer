@@ -4,7 +4,9 @@
     "src/renderer/**/*",
     "src/preload/**/*",
     "src/shared/**/*",
-    "src/global.d.ts"
+    "src/global.d.ts",
+    "tests/renderer/**/*",
+    "tests/setup.ts"
   ],
   "exclude": ["src/main/**/*"],
   "compilerOptions": {

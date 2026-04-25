@@ -1,7 +1,17 @@
+import type { JSX } from 'react';
+/**
+ * Dark / light theme toggle button.
+ *
+ * @description Toggles the application theme and persists the choice
+ *              via Zustand's `persist` middleware.
+ *
+ * @module renderer/components/ThemeToggle
+ */
+
 import { useScanStore } from '@renderer/store/scanStore';
 import { Sun, Moon } from 'lucide-react';
 
-export function ThemeToggle() {
+export function ThemeToggle(): JSX.Element {
   const theme = useScanStore(s => s.theme);
   const setTheme = useScanStore(s => s.setTheme);
 

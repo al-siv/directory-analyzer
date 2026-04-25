@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.json",
   "include": ["src/main/**/*", "src/shared/**/*", "tests/**/*"],
-  "exclude": ["src/renderer/**/*", "src/preload/**/*", "node_modules", "out", "dist"],
+  "exclude": ["src/renderer/**/*", "src/preload/**/*", "tests/renderer/**/*", "tests/setup.ts", "node_modules", "out", "dist"],
   "compilerOptions": {
     "ignoreDeprecations": "6.0",
     "composite": true,

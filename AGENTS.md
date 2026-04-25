@@ -13,7 +13,7 @@
 | **Project Name** | Directory Analyzer |
 | **Author** | Alexander Sivolobov |
 | **Python Version** | 1.2.1 (CLI) — archived in `archive/python/` |
-| **Target Stack** | TypeScript 5.4+ + Electron 33+ + React 18+ + Vite |
+| **Target Stack** | TypeScript 6 + Electron 41 + React 19 + Vite |
 | **Package Manager** | `pnpm` (deterministic, disk-efficient, workspace-ready) |
 | **License** | MIT |
 | **Repository Visibility** | Public — acts as a professional portfolio piece |
@@ -46,7 +46,7 @@ This project is a **public-facing demonstration of engineering excellence**. All
 |------|------|------|
 | **Type Safety** | TypeScript | `strict: true`, no `any` in core logic, explicit return types |
 | **Linting** | ESLint + `@typescript-eslint/strict-type-checked` | No warnings in CI, `no-explicit-any` enforced, type-aware rules active |
-| **Security Linting** | `eslint-plugin-security` + `eslint-plugin-security-node` | Detect unsafe regex, path traversal, eval, child_process risks |
+| **Security Linting** | `eslint-plugin-security` | Detect unsafe regex, path traversal, eval, child_process risks |
 | **Formatting** | Prettier | Consistent style, 2-space indent, single quotes |
 | **Pre-commit** | Husky + lint-staged | Block commit if lint/tests fail |
 | **Test Coverage** | Vitest (`v8` provider) | Minimum 80% line coverage on `src/main/core/` |
@@ -88,7 +88,7 @@ This project is a **public-facing demonstration of engineering excellence**. All
 │  └── Window management                  │
 ├─────────────────────────────────────────┤
 │  Renderer Process (Chromium + TS)       │
-│  ├── React 18 + Tailwind CSS            │
+│  ├── React 19 + Tailwind CSS 4          │
 │  ├── Tables, charts (Recharts)          │
 │  ├── Zustand state store                │
 │  └── IPC calls to main process          │
@@ -102,21 +102,21 @@ This project is a **public-facing demonstration of engineering excellence**. All
 
 | Layer | Technology | Purpose |
 |-------|-----------|---------|
-| Runtime | Electron 33+ (latest stable) | Desktop shell |
-| Language | TypeScript 5.4+ | Type-safe code |
+| Runtime | Electron 41 (latest stable) | Desktop shell |
+| Language | TypeScript 6 | Type-safe code |
 | Bundler | Vite (electron-vite) | Fast HMR and bundling |
-| UI | React 18+ | Component-based UI |
-| Styling | Tailwind CSS 3.4+ | Utility-first CSS |
-| State | Zustand 4.5+ | Lightweight global state |
-| Charts | Recharts 2.12+ | Data visualization |
+| UI | React 19 | Component-based UI |
+| Styling | Tailwind CSS 4 | Utility-first CSS |
+| State | Zustand 5 | Lightweight global state |
+| Charts | Recharts 3 | Data visualization |
 | Icons | Lucide React | Consistent iconography |
-| Windows FFI | koffi 2.8+ | Call `GetFileAttributesW` without C++ addon compilation |
-| Unit Tests | Vitest 1.5+ | Fast TS-native testing |
-| E2E Tests | Playwright 1.43+ | Cross-platform E2E |
-| React Tests | @testing-library/react 15+ | Component testing |
-| Linting | ESLint 8+ + Prettier 3+ | Code quality |
-| Security Lint | eslint-plugin-security 2+ | Security patterns |
-| Validation | Zod 3.23+ | Runtime schema validation for IPC boundaries |
+| Windows FFI | koffi 2.16 | Call `GetFileAttributesW` without C++ addon compilation |
+| Unit Tests | Vitest 4 | Fast TS-native testing |
+| E2E Tests | Playwright 1.59 | Cross-platform E2E |
+| React Tests | @testing-library/react 16 | Component testing |
+| Linting | ESLint 10 + Prettier 3 | Code quality |
+| Security Lint | eslint-plugin-security 4 | Security patterns |
+| Validation | Zod 4 | Runtime schema validation for IPC boundaries |
 | IPC | Raw typed IPC (no wrapper lib) | Full control, zero abstraction overhead |
 
 ### Module Mapping: Python → TypeScript

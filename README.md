@@ -38,10 +38,10 @@ Electron Main Process          Preload Script (bridge)        React Renderer
 
 | Layer | Technology |
 |-------|-----------|
-| Runtime | Electron 33 |
-| Language | TypeScript 5.5 (strict) |
+| Runtime | Electron 41 |
+| Language | TypeScript 6 (strict) |
 | Bundler | Vite (electron-vite) |
-| UI | React 18 + Tailwind CSS |
+| UI | React 19 + Tailwind CSS 4 |
 | State | Zustand |
 | Charts | Recharts |
 | Tests | Vitest (unit) + Playwright (E2E) |
@@ -53,20 +53,20 @@ Electron Main Process          Preload Script (bridge)        React Renderer
 
 ```bash
 # Install dependencies
-npm install
+pnpm install
 
 # Development (with HMR)
-npm run dev
+pnpm run dev
 
 # Run tests
-npm test                 # 47 unit tests
-npx playwright test      # E2E
+pnpm test                 # unit tests
+pnpm exec playwright test # E2E
 
 # Production build
-npm run build
+pnpm run build
 
 # Package for distribution
-npm run dist             # .app / .exe / .AppImage
+pnpm run dist             # .app / .exe / .AppImage
 ```
 
 ---
@@ -106,7 +106,7 @@ src/
 ## Quality Gates
 
 - **TypeScript strict** — no `any` in core logic
-- **ESLint + security** — `eslint-plugin-security`, `eslint-plugin-security-node`
+- **ESLint + security** — `eslint-plugin-security`
 - **Unit tests** — 47 tests covering classifier, scanner, exporter, formatters, FS utils
 - **Parity test** — TS scanner verified against Python fixture sizes byte-for-byte
 - **E2E** — Playwright launches real Electron window

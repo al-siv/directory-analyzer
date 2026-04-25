@@ -59,6 +59,15 @@ export interface DirectoryInfo {
 
   /** Error message if scanning failed, otherwise null. */
   errorMessage: string | null;
+
+  /** Files found directly in this directory (after filter). */
+  files: readonly FileInfo[];
+
+  /** Category -> total size in bytes for this directory. */
+  categoryBreakdown: Readonly<Record<string, number>>;
+
+  /** Dominant category by size, or null if no files. */
+  dominantCategory: string | null;
 }
 
 /**
@@ -116,6 +125,9 @@ export interface ScanResult {
 
   /** Number of directories that could not be accessed. */
   errorCount: number;
+
+  /** Paths of directories that could not be accessed. */
+  accessErrors: readonly string[];
 
   /** Scan duration in seconds. */
   scanDuration: number;

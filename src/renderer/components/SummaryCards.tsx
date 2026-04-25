@@ -1,3 +1,13 @@
+import type { JSX } from 'react';
+/**
+ * Summary statistic cards.
+ *
+ * @description Displays top-level scan metrics: total directories,
+ *              files, size, duration, and error count.
+ *
+ * @module renderer/components/SummaryCards
+ */
+
 import { useScanStore } from '@renderer/store/scanStore';
 import { Folder, FileText, HardDrive, Clock, AlertTriangle } from 'lucide-react';
 import { bytesToHumanReadable } from '@shared/utils/format';
@@ -7,14 +17,19 @@ function Card({
   label,
   value,
   colorClass,
+  onClick,
 }: {
   icon: React.ReactNode;
   label: string;
   value: string;
   colorClass: string;
-}) {
+  onClick?: () => void;
+}): JSX.Element {
   return (
-    <div className="flex items-center gap-3 rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+    <div
+      className={`flex items-center gap-3 rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900 ${onClick ? 'cursor-pointer transition-shadow hover:shadow-md' : ''}`}
+      onClick={onClick}
+    >
       <div className={`rounded-md p-2 ${colorClass}`}>{icon}</div>
       <div>
         <p className="text-xs text-slate-500 dark:text-slate-400">{label}</p>
@@ -24,14 +39,15 @@ function Card({
   );
 }
 
-export function SummaryCards() {
+export function SummaryCards(): JSX.Element {
   const result = useScanStore(s => s.scanResult);
   const stats = result?.statistics;
+  const setShowAccessErrors = useScanStore(s => s.setShowAccessErrors);
 
   if (!stats) return <></>;
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+    <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
       <Card
         icon={<Folder className="h-5 w-5 text-blue-600 dark:text-blue-400" />}
         label="Directories"
@@ -61,6 +77,13 @@ export function SummaryCards() {
         label="Errors"
         value={result.errorCount.toLocaleString()}
         colorClass="bg-red-50 dark:bg-red-900/30"
+        onClick={
+          result.accessErrors.length > 0
+            ? () => {
+                setShowAccessErrors(true);
+              }
+            : undefined
+        }
       />
     </div>
   );

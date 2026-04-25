@@ -457,4 +457,31 @@ interface ScanStore {
 
 ---
 
+## 13. Implementation Status (as of 2026-04-25)
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| Keyboard shortcuts (Cmd+O, Cmd+Enter, Esc, Cmd+Shift+T) | ✅ Implemented | Global handlers in `App.tsx` |
+| AccessErrorsModal | ✅ Implemented | Opens from SummaryCards error count or auto |
+| Dominant category column in ResultsTable | ✅ Implemented | Color-coded badge, sortable |
+| Double-click row → open in file manager | ✅ Implemented | `ResultsTable.tsx` |
+| DirectoryDetail file list (expandable) | ✅ Implemented | Toggle with file count |
+| DirectoryDetail category mini-bar | ✅ Implemented | Per-directory breakdown bars |
+| DirectoryDetail copy path | ✅ Implemented | Uses `navigator.clipboard` |
+| Responsive layout >1280px sidebar | ✅ Implemented | `xl:w-[400px]` |
+| Responsive layout 1024-1279px sidebar | ✅ Implemented | `lg:w-[320px]` |
+| Mobile detail drawer (<1024px) | ✅ Implemented | Fixed overlay with close button |
+| Summary cards 2-col on mobile | ✅ Implemented | `grid-cols-2 lg:grid-cols-5` |
+| Chips input for extensions | ❌ Not implemented | Plain text input (UI-SPEC §2) |
+| Verbose toggle | ❌ Not implemented | Not exposed in UI |
+| Path breadcrumb / copy in header | ❌ Not implemented | Plain text input only |
+| CategoryBadge standalone component | ❌ Not implemented | Inline styles in table/detail |
+| Header component extracted from App | ❌ Not implemented | Inline in `App.tsx` |
+| FilterPanel extracted component | ❌ Not implemented | Inline in `ScanConfigForm.tsx` |
+| Virtualization for >1000 rows | ❌ Not implemented | No virtualization yet |
+| Pagination | ❌ Not implemented | Not needed for typical use |
+| Toast notifications for export | ❌ Not implemented | Inline error text only |
+
+---
+
 *Документ является дополнением к `AGENTS.md` и `PLAN.md`. При реализации UI компонентов этот spec является источником истины для вёрстки, поведения и user flow.*

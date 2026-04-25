@@ -1,12 +1,43 @@
+import type { JSX } from 'react';
+/**
+ * Sortable and filterable results table.
+ *
+ * @description Displays scanned directories with size, percentage,
+ *              and file count. Supports client-side sorting,
+ *              path filtering, and row selection for the detail panel.
+ *
+ * @module renderer/components/ResultsTable
+ */
+
 import { useScanStore } from '@renderer/store/scanStore';
 import { useMemo, useState } from 'react';
 import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { bytesToHumanReadable, formatPercentage } from '@shared/utils/format';
 
-type SortKey = 'path' | 'sizeBytes' | 'percentage' | 'fileCount';
+const CATEGORY_COLORS: Record<string, string> = {
+  images: 'bg-violet-100 text-violet-700 dark:bg-violet-900 dark:text-violet-300',
+  videos: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',
+  audio: 'bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300',
+  documents: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
+  office: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300',
+  archives: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300',
+  code: 'bg-teal-100 text-teal-700 dark:bg-teal-900 dark:text-teal-300',
+  system: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+  other: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
+};
+
+type SortKey = 'path' | 'sizeBytes' | 'percentage' | 'fileCount' | 'dominantCategory';
 type SortDir = 'asc' | 'desc';
 
-function SortIcon({ col, sortKey, sortDir }: { col: SortKey; sortKey: SortKey; sortDir: SortDir }) {
+function SortIcon({
+  col,
+  sortKey,
+  sortDir,
+}: {
+  col: SortKey;
+  sortKey: SortKey;
+  sortDir: SortDir;
+}): JSX.Element {
   if (sortKey !== col) return <ArrowUpDown className="ml-1 inline h-3 w-3 opacity-40" />;
   return sortDir === 'asc' ? (
     <ArrowUp className="ml-1 inline h-3 w-3" />
@@ -15,7 +46,7 @@ function SortIcon({ col, sortKey, sortDir }: { col: SortKey; sortKey: SortKey; s
   );
 }
 
-export function ResultsTable() {
+export function ResultsTable(): JSX.Element {
   const scanResult = useScanStore(s => s.scanResult);
   const selectedPath = useScanStore(s => s.selectedDirectoryPath);
   const setSelected = useScanStore(s => s.setSelectedDirectoryPath);
@@ -40,6 +71,9 @@ export function ResultsTable() {
       if (sortKey === 'percentage') {
         av = totalSize > 0 ? (a.sizeBytes / totalSize) * 100 : 0;
         bv = totalSize > 0 ? (b.sizeBytes / totalSize) * 100 : 0;
+      } else if (sortKey === 'dominantCategory') {
+        av = a.dominantCategory ?? '';
+        bv = b.dominantCategory ?? '';
       } else {
         av = a[sortKey];
         bv = b[sortKey];
@@ -119,22 +153,37 @@ export function ResultsTable() {
               >
                 Files <SortIcon col="fileCount" sortKey={sortKey} sortDir={sortDir} />
               </th>
+              <th
+                className="cursor-pointer px-4 py-2 font-medium hover:text-slate-700 dark:hover:text-slate-200"
+                onClick={() => {
+                  toggleSort('dominantCategory');
+                }}
+              >
+                Category <SortIcon col="dominantCategory" sortKey={sortKey} sortDir={sortDir} />
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
             {sorted.map((dir, idx) => {
               const isSelected = selectedPath === dir.path;
+              const catClass = dir.dominantCategory
+                ? (CATEGORY_COLORS[dir.dominantCategory] ?? CATEGORY_COLORS.other)
+                : '';
               return (
                 <tr
                   key={dir.path}
                   onClick={() => {
                     setSelected(dir.path);
                   }}
+                  onDoubleClick={() => {
+                    void window.electronAPI.openPath(dir.path);
+                  }}
                   className={`cursor-pointer transition-colors ${
                     isSelected
                       ? 'bg-blue-50 dark:bg-blue-900/20'
                       : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'
                   }`}
+                  title="Double-click to open in file manager"
                 >
                   <td className="px-4 py-2 text-slate-400">{idx + 1}</td>
                   <td className="max-w-xs truncate px-4 py-2 font-mono text-xs" title={dir.path}>
@@ -146,6 +195,16 @@ export function ResultsTable() {
                   </td>
                   <td className="px-4 py-2 text-slate-500 dark:text-slate-400">
                     {dir.fileCount.toLocaleString()}
+                  </td>
+                  <td className="px-4 py-2">
+                    {dir.dominantCategory && (
+                      <span
+                        className={`inline-block rounded px-2 py-0.5 text-xs font-medium ${catClass}`}
+                      >
+                        {dir.dominantCategory.charAt(0).toUpperCase() +
+                          dir.dominantCategory.slice(1)}
+                      </span>
+                    )}
                   </td>
                 </tr>
               );

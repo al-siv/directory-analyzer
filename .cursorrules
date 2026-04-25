@@ -157,8 +157,8 @@ When working on code, agents should reference:
 
 ## Version Info
 
-- Electron: latest stable (33+ at time of writing)
-- TypeScript: 5.4+
-- React: 18+
+- Electron: 41 (latest stable at time of writing)
+- TypeScript: 6
+- React: 19
 - Node.js: 20+ (LTS)
 - Package Manager: pnpm

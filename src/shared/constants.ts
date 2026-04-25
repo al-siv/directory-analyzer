@@ -18,8 +18,3 @@ export const PROGRESS_PERCENTAGE_INTERVAL = 5;
 
 /** Default number of top directories shown. */
 export const DEFAULT_TOP_COUNT = 50;
-
-import { cpus } from 'os';
-
-/** Maximum concurrent workers for parallel scanning. */
-export const MAX_WORKERS = Math.max(1, cpus().length);

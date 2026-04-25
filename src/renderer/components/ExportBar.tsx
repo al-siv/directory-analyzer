@@ -1,9 +1,19 @@
+import type { JSX } from 'react';
+/**
+ * Export action bar.
+ *
+ * @description Provides buttons to export the current scan result
+ *              as text, CSV, or JSON via the native save dialog.
+ *
+ * @module renderer/components/ExportBar
+ */
+
 import { useScanStore } from '@renderer/store/scanStore';
 import { FileText, Table, Code } from 'lucide-react';
 import { useState } from 'react';
 import type { OutputFormat } from '@shared/types';
 
-export function ExportBar() {
+export function ExportBar(): JSX.Element {
   const scanResult = useScanStore(s => s.scanResult);
   const [exportError, setExportError] = useState<string | null>(null);
 

@@ -24,7 +24,10 @@ import {
   getSubdirectories,
 } from '@main/utils/fs';
 import { ProgressReporter } from '@main/utils/progress';
-import { MAX_WORKERS } from '@shared/constants';
+import { cpus } from 'os';
+
+/** Maximum concurrent async tasks for parallel scanning. */
+const MAX_WORKERS = Math.max(1, cpus().length);
 
 interface ScanDirectoryResult {
   dirInfo: DirectoryInfo;
@@ -109,6 +112,7 @@ export class DirectoryScanner {
         directories: results,
         totalScanned: this.totalDirectories,
         errorCount: this.errorDirectories.length,
+        accessErrors: [...this.errorDirectories],
         scanDuration: duration,
         scanOptions: this.options,
         statistics,
@@ -276,6 +280,9 @@ export class DirectoryScanner {
           fileCount: 0,
           lastScanned: scanTime,
           errorMessage: 'Permission denied or directory inaccessible',
+          files: [],
+          categoryBreakdown: {},
+          dominantCategory: null,
         },
         files: [],
       };
@@ -318,9 +325,24 @@ export class DirectoryScanner {
           fileCount: 0,
           lastScanned: scanTime,
           errorMessage: msg,
+          files: [],
+          categoryBreakdown: {},
+          dominantCategory: null,
         },
         files: [],
       };
+    }
+
+    const categoryBreakdown: Record<string, number> = {};
+    let dominantCategory: string | null = null;
+    let dominantSize = 0;
+
+    for (const f of directoryFiles) {
+      categoryBreakdown[f.category] = (categoryBreakdown[f.category] ?? 0) + f.sizeBytes;
+      if (categoryBreakdown[f.category] > dominantSize) {
+        dominantSize = categoryBreakdown[f.category];
+        dominantCategory = f.category;
+      }
     }
 
     return {
@@ -330,6 +352,9 @@ export class DirectoryScanner {
         fileCount,
         lastScanned: scanTime,
         errorMessage: null,
+        files: directoryFiles,
+        categoryBreakdown,
+        dominantCategory,
       },
       files: directoryFiles,
     };

@@ -152,7 +152,16 @@ export function registerIpcHandlers(): void {
  * @returns Sanitized ScanOptions.
  * @throws {Error} If validation fails.
  */
-async function validateScanOptions(options: unknown): Promise<ScanOptions> {
+/**
+ * Validate and sanitize ScanOptions received from the renderer.
+ *
+ * @description Prevents path traversal by resolving paths and ensuring
+ *              they stay within allowed boundaries.
+ * @param options - Raw options from the renderer.
+ * @returns Sanitized ScanOptions.
+ * @throws {Error} If validation fails.
+ */
+export async function validateScanOptions(options: unknown): Promise<ScanOptions> {
   const parsed = ScanOptionsSchema.parse(options);
 
   const targetPath = resolve(normalize(parsed.targetPath));

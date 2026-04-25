@@ -1,4 +1,5 @@
 import { useScanStore } from '@renderer/store/scanStore';
+import { useScan } from '@renderer/hooks/useScan';
 import { ScanConfigForm } from '@renderer/components/ScanConfigForm';
 import { ScanProgress } from '@renderer/components/ScanProgress';
 import { ResultsTable } from '@renderer/components/ResultsTable';
@@ -7,20 +8,90 @@ import { DirectoryDetail } from '@renderer/components/DirectoryDetail';
 import { ExportBar } from '@renderer/components/ExportBar';
 import { SummaryCards } from '@renderer/components/SummaryCards';
 import { ThemeToggle } from '@renderer/components/ThemeToggle';
-import { HardDrive } from 'lucide-react';
-import { useEffect } from 'react';
+import { AccessErrorsModal } from '@renderer/components/AccessErrorsModal';
+import { HardDrive, X } from 'lucide-react';
+import { useEffect, useCallback } from 'react';
 
 const isMac = window.electronAPI.getPlatform() === 'darwin';
+const modKey = isMac ? 'metaKey' : 'ctrlKey';
 
 export default function App() {
   const appState = useScanStore(s => s.appState);
   const scanResult = useScanStore(s => s.scanResult);
   const error = useScanStore(s => s.error);
   const theme = useScanStore(s => s.theme);
+  const targetPath = useScanStore(s => s.targetPath);
+  const setTargetPath = useScanStore(s => s.setTargetPath);
+  const setTheme = useScanStore(s => s.setTheme);
+  const selectedDirectoryPath = useScanStore(s => s.selectedDirectoryPath);
+  const setSelectedDirectoryPath = useScanStore(s => s.setSelectedDirectoryPath);
+  const { startScan, cancelScan } = useScan();
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
   }, [theme]);
+
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      const isMod = e[modKey];
+
+      // Cmd/Ctrl + O — browse for folder
+      if (isMod && e.key === 'o') {
+        e.preventDefault();
+        if (appState !== 'scanning') {
+          void window.electronAPI.showOpenDirectoryDialog().then(result => {
+            if (result.success && result.path) {
+              setTargetPath(result.path);
+            }
+          });
+        }
+        return;
+      }
+
+      // Cmd/Ctrl + Enter — start scan
+      if (isMod && e.key === 'Enter') {
+        e.preventDefault();
+        if (appState !== 'scanning' && targetPath.length > 0) {
+          void startScan();
+        }
+        return;
+      }
+
+      // Cmd/Ctrl + Shift + T — toggle theme
+      if (isMod && e.shiftKey && e.key.toLowerCase() === 't') {
+        e.preventDefault();
+        setTheme(theme === 'dark' ? 'light' : 'dark');
+        return;
+      }
+
+      // Esc — cancel scan or clear selection
+      if (e.key === 'Escape') {
+        if (appState === 'scanning') {
+          e.preventDefault();
+          cancelScan();
+        } else {
+          setSelectedDirectoryPath(null);
+        }
+      }
+    },
+    [
+      appState,
+      targetPath,
+      theme,
+      startScan,
+      cancelScan,
+      setTargetPath,
+      setTheme,
+      setSelectedDirectoryPath,
+    ]
+  );
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handleKeyDown]);
 
   return (
     <div className="flex h-screen flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
@@ -63,16 +134,39 @@ export default function App() {
                 <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
                   <ResultsTable />
                 </div>
-                <div className="hidden w-[400px] flex-shrink-0 flex-col gap-6 overflow-auto lg:flex">
+                {/* Desktop sidebar */}
+                <div className="hidden w-[400px] flex-shrink-0 flex-col gap-6 overflow-auto xl:flex">
                   <CategoryChart />
                   <DirectoryDetail />
                 </div>
               </div>
               <ExportBar />
+
+              {/* Mobile detail drawer */}
+              {selectedDirectoryPath && (
+                <div className="fixed inset-0 z-40 flex justify-end bg-black/50 xl:hidden">
+                  <div className="h-full w-full max-w-md overflow-auto bg-white p-4 shadow-xl dark:bg-slate-900">
+                    <div className="mb-4 flex items-center justify-between">
+                      <h3 className="text-sm font-semibold">Directory Detail</h3>
+                      <button
+                        onClick={() => {
+                          setSelectedDirectoryPath(null);
+                        }}
+                        className="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                    <DirectoryDetail />
+                  </div>
+                </div>
+              )}
             </>
           )}
         </div>
       </main>
+
+      <AccessErrorsModal />
     </div>
   );
 }
