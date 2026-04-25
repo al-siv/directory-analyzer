@@ -28,8 +28,6 @@ share/python-wheels/
 MANIFEST
 
 # PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
 
@@ -85,13 +83,9 @@ ipython_config.py
 .python-version
 
 # pipenv
-#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
-#   However, in case of collaboration, if having platform-specific dependencies or dependencies
-#   having no cross-platform support, pipenv may install dependencies that don't work, or not
-#   install all needed dependencies.
 #Pipfile.lock
 
-# PEP 582; used by e.g. github.com/David-OConnor/pyflow
+# PEP 582
 __pypackages__/
 
 # Celery stuff
@@ -128,7 +122,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# Project-specific files
+# Project-specific files (Python legacy)
 largest_directories.txt
 test_results.*
 *.csv
@@ -146,3 +140,44 @@ no-access.txt
 # OS
 .DS_Store
 Thumbs.db
+
+# =============================================================================
+# ARCHIVE — Python legacy code (preserved for regression testing, not in repo)
+# =============================================================================
+archive/
+
+# =============================================================================
+# Node.js / TypeScript / Electron
+# =============================================================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+
+# Build outputs
+out/
+out-main/
+out-preload/
+out-renderer/
+release/
+*.tsbuildinfo
+
+# Electron
+# dist/  # uncomment if using electron-builder default output
+
+# Vitest
+coverage/
+
+# Playwright
+test-results/
+playwright-report/
+playwright/.cache/
+
+# Environment
+.env.local
+.env.*.local
+
+# Vite
+.vite/

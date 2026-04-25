@@ -1,0 +1,164 @@
+# Directory Analyzer — LLM Context & Contract Rules
+# 
+# This file provides structured context for AI-assisted development.
+# It ensures that LLM agents understand the project architecture,
+# coding standards, and quality expectations.
+#
+# Scope: All .ts, .tsx files in src/
+# Audience: Cursor, GitHub Copilot, Claude, OpenCode, and similar tools
+
+## Project Identity
+
+- **Name**: Directory Analyzer
+- **Type**: Cross-platform desktop application (Electron + TypeScript + React)
+- **Purpose**: Professional storage analytics — scan directories, classify files, visualize disk usage
+- **Author**: Alexander Sivolobov
+- **Visibility**: Public repository (showcase/portfolio piece)
+- **Python Legacy**: v1.2.1 CLI archived in archive/python/ (not in git)
+
+## Architecture Rules (Non-negotiable)
+
+### Process Boundaries
+1. **Main Process** (`src/main/`): Node.js runtime. File system access, worker threads, IPC handlers.
+2. **Renderer Process** (`src/renderer/`): Chromium runtime. React UI, no direct Node.js access.
+3. **Preload** (`src/preload/`): Bridge only. Expose typed API via `contextBridge`.
+4. **Shared** (`src/shared/`): Pure TypeScript. No Node.js APIs, no DOM APIs. Types, constants, IPC contracts.
+
+### Module Dependencies
+```
+shared → (no deps)
+preload → shared
+main → shared, preload contracts
+renderer → shared, preload API
+```
+
+**Forbidden**: Renderer importing from `main/` or Node.js modules. Main importing from `renderer/` or React.
+
+### Security Rules
+- `contextIsolation: true` always
+- `nodeIntegration: false` always
+- `contextBridge` is the ONLY way to expose main-process APIs to renderer
+- Validate ALL paths in IPC handlers before `fs` calls (prevent path traversal)
+- Read-only scanning: never delete or move user files
+- Export writes ONLY to paths returned by `dialog.showSaveDialog()`
+
+## Code Style (Strict Enforcement)
+
+### TypeScript
+- `strict: true` — no exceptions
+- No `any` in `src/main/core/` or `src/shared/`
+- Explicit return types on all exported functions
+- Prefer `interface` over `type` for object shapes
+- Prefer named exports over default exports
+- Use `readonly` arrays/objects for immutable data
+
+### Naming
+- Utilities: `kebab-case.ts` (e.g., `scan-store.ts`)
+- React components: `PascalCase.tsx` (e.g., `ResultsTable.tsx`)
+- Tests: `kebab-case.spec.ts` (e.g., `classifier.spec.ts`)
+- Hooks: `usePascalCase.ts` (e.g., `useScan.ts`)
+
+### File Organization
+- One principal export per file (where practical)
+- Co-locate tests with source or in `tests/unit/` mirror
+- Keep React components under 300 lines; extract sub-components
+
+## Documentation-by-Contract (Mandatory)
+
+Every exported function, class, and interface MUST have TSDoc with:
+
+```typescript
+/**
+ * [One-line summary]
+ *
+ * @description [Detailed explanation if needed]
+ * @param name - [Type, constraints, meaning]
+ * @returns [Value, format, edge cases]
+ * @throws {ErrorType} [When and why]
+ * @precondition [What must be true before call]
+ * @postcondition [What is guaranteed after success]
+ * @example
+ * functionCall(args); // expected output
+ */
+```
+
+**Quality check**: If an agent cannot write TSDoc for a function, the function is too complex and must be refactored.
+
+## Testing Requirements
+
+### Unit Tests (Vitest)
+- Test every exported pure function
+- Use temp directories for FS tests; clean up in `afterEach`
+- Snapshot tests for exporter output
+- Mock Windows FFI (`koffi`) in cross-platform tests
+
+### E2E Tests (Playwright)
+- Test the golden path: scan → results → export
+- Test error states: permission denied, invalid path, cancel
+- Test UI states: theme toggle, responsive layout
+
+### Coverage Gate
+- `src/main/core/`: minimum 80% line coverage
+- CI blocks merge if coverage drops below threshold
+
+## Algorithm Preservation (Python → TS)
+
+When porting Python logic, agents MUST verify:
+
+1. **Classification order**: Python dict iteration order determines overlap resolution (e.g., `.exe` → `archives`, not `system`). Use `Map` with identical insertion order.
+2. **Size formatting**: Divisor `1024.0`, units `["B","KB","MB","GB","TB"]`, zero → `"0 B"`, others → `"%.1f %s"`.
+3. **Percentage formatting**: `<0.01%` threshold, else `"%.2f%%"`.
+4. **Direct-files-only**: `fs.readdir` → filter `dirent.isFile()` → sum sizes. Do NOT recurse into subdirs per directory.
+5. **Hidden detection**: 
+   - Windows: `koffi` FFI call to `GetFileAttributesW`, check `FILE_ATTRIBUTE_HIDDEN` (0x2)
+   - Unix/macOS: `path.basename(dir).startsWith('.')`
+   - Fallback: dot-prefix on all platforms if FFI unavailable
+6. **Error handling**: Log silently (unless verbose), collect in array, write `no-access.txt` at end.
+
+## UI/UX Guidelines
+
+- **States**: IDLE → SCANNING → RESULTS → ERROR (see UI-SPEC.md)
+- **Theme**: Dark by default, toggle in header, persist to localStorage
+- **Responsive**: 
+  - >1100px: table + sidebar
+  - 900-1100px: compressed sidebar
+  - <900px: sidebar becomes drawer/modal
+- **Accessibility**: All interactive elements keyboard-focusable, ARIA labels on charts and tables
+- **Feedback**: Every user action has visual feedback (loading, success, error toast)
+
+## Decision Authority
+
+If an agent encounters a conflict between:
+- A and B → choose the option with **better type safety**
+- B and C → choose the option with **better testability**
+- C and D → choose the option with **better user experience**
+- D and security → choose **security**
+
+When in doubt, prefer **simplicity and explicitness** over clever abstractions.
+
+## Prohibited Patterns
+
+1. `eval()` or `new Function()` — never
+2. `innerHTML` or `dangerouslySetInnerHTML` — never
+3. `require()` in renderer — never (use IPC)
+4. `any` typed variables in core logic — never
+5. `console.log` in production code — use structured logging via `electron-log`
+6. Circular imports — forbidden; refactor instead
+7. God objects / classes >500 lines — extract services/helpers
+
+## Context Files
+
+When working on code, agents should reference:
+- `AGENTS.md` — architecture and conventions
+- `UI-SPEC.md` — UI wireframes and component specs
+- `PLAN.md` — migration phases and deliverables
+- `src/shared/types.ts` — canonical data models
+- `archive/python/src/` — Python source of truth (for behavior parity)
+
+## Version Info
+
+- Electron: latest stable (33+ at time of writing)
+- TypeScript: 5.4+
+- React: 18+
+- Node.js: 20+ (LTS)
+- Package Manager: pnpm
