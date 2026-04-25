@@ -1,9 +1,11 @@
 import { resolve } from 'path'
 import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
 import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   main: {
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
     plugins: [externalizeDepsPlugin()],
     build: {
       lib: {
@@ -26,6 +28,7 @@ export default defineConfig({
     }
   },
   preload: {
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
     plugins: [externalizeDepsPlugin()],
     build: {
       lib: {
@@ -51,7 +54,7 @@ export default defineConfig({
         }
       }
     },
-    plugins: [react()],
+    plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
         '@renderer': resolve('src/renderer'),

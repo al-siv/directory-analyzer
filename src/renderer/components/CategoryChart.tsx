@@ -25,7 +25,7 @@ const COLORS: Record<string, string> = {
   other: '#9ca3af',
 };
 
-export function CategoryChart(): JSX.Element {
+export function CategoryChart() {
   const scanResult = useScanStore(s => s.scanResult);
   const [view, setView] = useState<'pie' | 'bar'>('pie');
 
@@ -83,16 +83,17 @@ export function CategoryChart(): JSX.Element {
                 cx="50%"
                 cy="50%"
                 outerRadius={80}
-                label={(entry: { name: string; value: number }) =>
-                  `${entry.name} ${((entry.value / total) * 100).toFixed(1)}%`
+                label={(entry: { name?: string; value?: number }) =>
+                  `${entry.name ?? ''} ${(((entry.value ?? 0) / total) * 100).toFixed(1)}%`
                 }
               >
                 {data.map((entry, index) => (
+                  // eslint-disable-next-line @typescript-eslint/no-deprecated
                   <Cell key={`cell-${String(index)}`} fill={entry.color} />
                 ))}
               </Pie>
               <Tooltip
-                formatter={(value: number) => [`${(value / 1024 / 1024).toFixed(1)} MB`, 'Size']}
+                formatter={(value) => [`${(Number(value) / 1024 / 1024).toFixed(1)} MB`, 'Size']}
               />
             </PieChart>
           ) : (
@@ -101,10 +102,11 @@ export function CategoryChart(): JSX.Element {
               <XAxis type="number" hide />
               <YAxis dataKey="name" type="category" width={80} tick={{ fontSize: 12 }} />
               <Tooltip
-                formatter={(value: number) => [`${(value / 1024 / 1024).toFixed(1)} MB`, 'Size']}
+                formatter={(value) => [`${(Number(value) / 1024 / 1024).toFixed(1)} MB`, 'Size']}
               />
               <Bar dataKey="value">
                 {data.map((entry, index) => (
+                  // eslint-disable-next-line @typescript-eslint/no-deprecated
                   <Cell key={`cell-${String(index)}`} fill={entry.color} />
                 ))}
               </Bar>

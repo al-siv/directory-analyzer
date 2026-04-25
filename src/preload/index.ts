@@ -27,7 +27,12 @@ export interface ElectronAPI {
 }
 
 const api: ElectronAPI = {
-  scanStart: async options => ipcRenderer.invoke(IPC_CHANNELS.SCAN_START, options),
+  scanStart: async options =>
+    ipcRenderer.invoke(IPC_CHANNELS.SCAN_START, options) as Promise<{
+      success: boolean;
+      result?: ScanResult;
+      error?: string;
+    }>,
 
   scanCancel: () => {
     void ipcRenderer.invoke(IPC_CHANNELS.SCAN_CANCEL);
@@ -44,11 +49,23 @@ const api: ElectronAPI = {
   },
 
   exportResults: async (result, format) =>
-    ipcRenderer.invoke(IPC_CHANNELS.EXPORT_RESULTS, { result, format }),
+    ipcRenderer.invoke(IPC_CHANNELS.EXPORT_RESULTS, { result, format }) as Promise<{
+      success: boolean;
+      filePath?: string;
+      error?: string;
+    }>,
 
-  showOpenDirectoryDialog: async () => ipcRenderer.invoke(IPC_CHANNELS.SHOW_OPEN_DIALOG),
+  showOpenDirectoryDialog: async () =>
+    ipcRenderer.invoke(IPC_CHANNELS.SHOW_OPEN_DIALOG) as Promise<{
+      success: boolean;
+      path?: string;
+    }>,
 
-  openPath: async dirPath => ipcRenderer.invoke(IPC_CHANNELS.OPEN_PATH, dirPath),
+  openPath: async dirPath =>
+    ipcRenderer.invoke(IPC_CHANNELS.OPEN_PATH, dirPath) as Promise<{
+      success: boolean;
+      error?: string;
+    }>,
 
   getPlatform: (): string => process.platform,
 };

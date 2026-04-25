@@ -1,6 +1,9 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-slate-850: #172033;
+  --color-slate-950: #020617;
+}
 
 @layer base {
   html {

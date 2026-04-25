@@ -12,7 +12,7 @@ function Card({
   label: string;
   value: string;
   colorClass: string;
-}): JSX.Element {
+}) {
   return (
     <div className="flex items-center gap-3 rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
       <div className={`rounded-md p-2 ${colorClass}`}>{icon}</div>
@@ -24,7 +24,7 @@ function Card({
   );
 }
 
-export function SummaryCards(): JSX.Element {
+export function SummaryCards() {
   const result = useScanStore(s => s.scanResult);
   const stats = result?.statistics;
 

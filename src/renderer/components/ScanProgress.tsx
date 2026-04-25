@@ -1,7 +1,7 @@
 import { useScanStore } from '@renderer/store/scanStore';
 import { Loader2 } from 'lucide-react';
 
-export function ScanProgress(): JSX.Element {
+export function ScanProgress() {
   const progress = useScanStore(s => s.progress);
 
   const current = progress?.current ?? 0;

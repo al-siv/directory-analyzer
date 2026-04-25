@@ -6,7 +6,16 @@ import { bytesToHumanReadable, formatPercentage } from '@shared/utils/format';
 type SortKey = 'path' | 'sizeBytes' | 'percentage' | 'fileCount';
 type SortDir = 'asc' | 'desc';
 
-export function ResultsTable(): JSX.Element {
+function SortIcon({ col, sortKey, sortDir }: { col: SortKey; sortKey: SortKey; sortDir: SortDir }) {
+  if (sortKey !== col) return <ArrowUpDown className="ml-1 inline h-3 w-3 opacity-40" />;
+  return sortDir === 'asc' ? (
+    <ArrowUp className="ml-1 inline h-3 w-3" />
+  ) : (
+    <ArrowDown className="ml-1 inline h-3 w-3" />
+  );
+}
+
+export function ResultsTable() {
   const scanResult = useScanStore(s => s.scanResult);
   const selectedPath = useScanStore(s => s.selectedDirectoryPath);
   const setSelected = useScanStore(s => s.setSelectedDirectoryPath);
@@ -53,15 +62,6 @@ export function ResultsTable(): JSX.Element {
     }
   };
 
-  const SortIcon = ({ col }: { col: SortKey }): JSX.Element => {
-    if (sortKey !== col) return <ArrowUpDown className="ml-1 inline h-3 w-3 opacity-40" />;
-    return sortDir === 'asc' ? (
-      <ArrowUp className="ml-1 inline h-3 w-3" />
-    ) : (
-      <ArrowDown className="ml-1 inline h-3 w-3" />
-    );
-  };
-
   const formatPct = (bytes: number): string => {
     const total = scanResult?.statistics.totalSizeBytes ?? 0;
     if (total === 0) return formatPercentage(0);
@@ -93,7 +93,7 @@ export function ResultsTable(): JSX.Element {
                   toggleSort('path');
                 }}
               >
-                Directory <SortIcon col="path" />
+                Directory <SortIcon col="path" sortKey={sortKey} sortDir={sortDir} />
               </th>
               <th
                 className="cursor-pointer px-4 py-2 font-medium hover:text-slate-700 dark:hover:text-slate-200"
@@ -101,7 +101,7 @@ export function ResultsTable(): JSX.Element {
                   toggleSort('sizeBytes');
                 }}
               >
-                Size <SortIcon col="sizeBytes" />
+                Size <SortIcon col="sizeBytes" sortKey={sortKey} sortDir={sortDir} />
               </th>
               <th
                 className="cursor-pointer px-4 py-2 font-medium hover:text-slate-700 dark:hover:text-slate-200"
@@ -109,7 +109,7 @@ export function ResultsTable(): JSX.Element {
                   toggleSort('percentage');
                 }}
               >
-                % <SortIcon col="percentage" />
+                % <SortIcon col="percentage" sortKey={sortKey} sortDir={sortDir} />
               </th>
               <th
                 className="cursor-pointer px-4 py-2 font-medium hover:text-slate-700 dark:hover:text-slate-200"
@@ -117,7 +117,7 @@ export function ResultsTable(): JSX.Element {
                   toggleSort('fileCount');
                 }}
               >
-                Files <SortIcon col="fileCount" />
+                Files <SortIcon col="fileCount" sortKey={sortKey} sortDir={sortDir} />
               </th>
             </tr>
           </thead>

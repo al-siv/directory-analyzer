@@ -3,10 +3,12 @@
   "include": [
     "src/renderer/**/*",
     "src/preload/**/*",
-    "src/shared/**/*"
+    "src/shared/**/*",
+    "src/global.d.ts"
   ],
   "exclude": ["src/main/**/*"],
   "compilerOptions": {
+    "ignoreDeprecations": "6.0",
     "composite": true,
     "jsx": "react-jsx",
     "baseUrl": ".",

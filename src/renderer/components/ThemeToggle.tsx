@@ -1,7 +1,7 @@
 import { useScanStore } from '@renderer/store/scanStore';
 import { Sun, Moon } from 'lucide-react';
 
-export function ThemeToggle(): JSX.Element {
+export function ThemeToggle() {
   const theme = useScanStore(s => s.theme);
   const setTheme = useScanStore(s => s.setTheme);
 

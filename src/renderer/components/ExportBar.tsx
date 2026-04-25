@@ -3,7 +3,7 @@ import { FileText, Table, Code } from 'lucide-react';
 import { useState } from 'react';
 import type { OutputFormat } from '@shared/types';
 
-export function ExportBar(): JSX.Element {
+export function ExportBar() {
   const scanResult = useScanStore(s => s.scanResult);
   const [exportError, setExportError] = useState<string | null>(null);
 

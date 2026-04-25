@@ -3,7 +3,7 @@ import { useScan } from '@renderer/hooks/useScan';
 import { FolderOpen, Play, Square, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 
-export function ScanConfigForm(): JSX.Element {
+export function ScanConfigForm() {
   const { startScan, cancelScan } = useScan();
   const [showFilters, setShowFilters] = useState(false);
 

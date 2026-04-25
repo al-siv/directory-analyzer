@@ -2,7 +2,7 @@ import { useScanStore } from '@renderer/store/scanStore';
 import { useMemo } from 'react';
 import { FolderOpen, FileText, BarChart3, ExternalLink } from 'lucide-react';
 
-export function DirectoryDetail(): JSX.Element {
+export function DirectoryDetail() {
   const scanResult = useScanStore(s => s.scanResult);
   const selectedPath = useScanStore(s => s.selectedDirectoryPath);
 

@@ -26,7 +26,7 @@ function initWindowsHiddenDetection(): void {
   if (platform() !== 'win32') return;
 
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     koffiModule = require('koffi') as typeof import('koffi');
     const kernel32 = koffiModule.load('kernel32.dll');
     // koffi type declarations do not perfectly match the runtime API;

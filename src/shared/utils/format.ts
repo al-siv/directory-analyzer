@@ -24,7 +24,7 @@ export function bytesToHumanReadable(sizeBytes: number): string {
   }
 
   const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-  let size = Number(sizeBytes);
+  let size = sizeBytes;
 
   for (const unit of units) {
     if (size < BYTES_PER_KB) {

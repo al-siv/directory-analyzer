@@ -12,7 +12,7 @@ import { useEffect } from 'react';
 
 const isMac = window.electronAPI.getPlatform() === 'darwin';
 
-export default function App(): JSX.Element {
+export default function App() {
   const appState = useScanStore(s => s.appState);
   const scanResult = useScanStore(s => s.scanResult);
   const error = useScanStore(s => s.error);

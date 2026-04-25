@@ -59,7 +59,7 @@ describe('ContentClassifier', () => {
 
   describe('statistics', () => {
     it('calculates category statistics by size', () => {
-      const files = [
+      const files: import('@shared/types').FileInfo[] = [
         { path: 'a.jpg', sizeBytes: 1000, extension: '.jpg', category: 'images', mimeType: null },
         { path: 'b.mp4', sizeBytes: 5000, extension: '.mp4', category: 'videos', mimeType: null },
         {
@@ -70,30 +70,24 @@ describe('ContentClassifier', () => {
           mimeType: null,
         },
         { path: 'd.jpg', sizeBytes: 1500, extension: '.jpg', category: 'images', mimeType: null },
-      ] as const;
+      ];
 
-      const stats = classifier.getCategoryStatistics(
-        files as unknown as readonly import('@shared/types').FileInfo[]
-      );
+      const stats = classifier.getCategoryStatistics(files);
       expect(stats['images']).toBe(2500);
       expect(stats['videos']).toBe(5000);
       expect(stats['documents']).toBe(2000);
 
-      const counts = classifier.getFileCountByCategory(
-        files as unknown as readonly import('@shared/types').FileInfo[]
-      );
+      const counts = classifier.getFileCountByCategory(files);
       expect(counts['images']).toBe(2);
       expect(counts['videos']).toBe(1);
     });
 
     it('determines dominant category by size', () => {
-      const files = [
+      const files: import('@shared/types').FileInfo[] = [
         { path: 'a.jpg', sizeBytes: 100, extension: '.jpg', category: 'images', mimeType: null },
         { path: 'b.mp4', sizeBytes: 500, extension: '.mp4', category: 'videos', mimeType: null },
-      ] as const;
-      const dominant = classifier.getDominantCategory(
-        files as unknown as readonly import('@shared/types').FileInfo[]
-      );
+      ];
+      const dominant = classifier.getDominantCategory(files);
       expect(dominant).toBe('videos');
     });
 
