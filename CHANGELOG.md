@@ -5,6 +5,30 @@ All notable changes to Directory Analyzer will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2025-04-25
+
+### Migrated — TypeScript + Electron Desktop Application
+- **Complete rewrite** from Python CLI to cross-platform Electron desktop app
+- **Stack**: TypeScript 5.5 (strict), Electron 33, React 18, Vite, Tailwind CSS, Zustand, Recharts
+- **UI replaces CLI**: folder picker, real-time progress, sortable table, pie/bar charts, export panel, dark/light theme
+
+### Security
+- `contextIsolation: true`, `contextBridge` only, no `nodeIntegration`
+- All paths validated in IPC handlers before filesystem access
+- Read-only scanning; export writes only to native save dialog results
+- ESLint security plugins (`eslint-plugin-security`, `eslint-plugin-security-node`)
+
+### Quality
+- Strict TypeScript (`strict: true`, `no-explicit-any` in core)
+- 47 unit tests (Vitest) + Playwright E2E
+- Python parity regression test verifies identical scan results on same fixtures
+- koffi FFI for native Windows hidden-attribute detection (`GetFileAttributesW`)
+
+### Archived
+- Python v1.2.1 source moved to `archive/python/` (excluded from repository)
+
+---
+
 ## [1.2.1] - 2025-06-18
 
 ### Fixed

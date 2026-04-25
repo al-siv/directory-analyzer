@@ -1,125 +1,85 @@
 # Contributing to Directory Analyzer
 
-Thank you for your interest in contributing to Directory Analyzer! This document provides guidelines for contributing to the project.
-
-## Getting Started
-
-1. Fork the repository on GitHub
-2. Clone your fork locally:
-   ```bash
-   git clone https://github.com/yourusername/directory-analyzer.git
-   cd directory-analyzer
-   ```
-3. Create a new branch for your feature/fix:
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
+Thank you for your interest in contributing. This is a **public showcase project** — every line of code should demonstrate professional-grade quality.
 
 ## Development Setup
 
 ### Prerequisites
-- Python 3.11 or higher
-- Git
+- Node.js 20+ (LTS)
+- npm (bundled with Node)
 
 ### Installation
 ```bash
-# Install in development mode
-pip install -e .
-
-# Install with development dependencies
-pip install -e .[dev]
+npm install
 ```
 
-### Running Tests
+### Running
 ```bash
-# Run all tests
-pytest
+# Development with HMR
+npm run dev
 
-# Run with coverage
-pytest --cov=src --cov-report=html
+# Production build
+npm run build
+
+# Package for distribution
+npm run dist
+```
+
+### Testing
+```bash
+# Unit tests (Vitest)
+npm test
+
+# With coverage
+npm run test:coverage
+
+# E2E tests (Playwright)
+npx playwright test
 ```
 
 ### Code Quality
 ```bash
-# Format code
-black src/ tests/
+# Lint + typecheck + build (CI gate)
+npm run lint
+npm run typecheck
+npm run build
 
-# Check linting
-flake8 src/ tests/
-
-# Type checking
-mypy src/
+# Auto-fix lint and format
+npm run lint:fix
+npm run format
 ```
 
-## Making Changes
+## Standards
 
-### Code Style
-- Follow PEP 8 style guidelines
-- Use type hints for all functions and methods
-- Write descriptive docstrings
-- Keep functions focused and small
+### TypeScript
+- `strict: true` — no exceptions
+- No `any` in `src/main/core/` or `src/shared/`
+- Explicit return types on exported functions
+- Prefer `interface` over `type` for object shapes
 
-### Commit Messages
-- Use clear and descriptive commit messages
-- Start with a verb (Add, Fix, Update, etc.)
-- Keep the first line under 50 characters
-- Add detailed description if needed
+### Documentation
+Every exported function, class, and interface must have TSDoc with:
+- `@description`, `@param`, `@returns`, `@throws`
+- `@example` for non-trivial usage
 
-Example:
-```
-Add support for custom output formats
+### Security
+- Never expose Node.js APIs to renderer directly (use IPC + `contextBridge`)
+- Validate all paths in IPC handlers before `fs` calls
+- Read-only scanning; export writes only to native save dialog results
 
-- Implement XML output format
-- Add validation for custom format options
-- Update documentation with examples
-```
+### Git
+- Clear, descriptive commit messages
+- Start with a verb: `Add`, `Fix`, `Refactor`, `Update`
+- One logical change per commit
 
-### Testing
-- Write tests for new functionality
-- Ensure all existing tests pass
-- Aim for high test coverage
-- Test edge cases and error conditions
+## Pull Request Checklist
 
-## Submitting Changes
+- [ ] `npm run lint` passes with zero warnings
+- [ ] `npm test` passes (47+ tests)
+- [ ] `npm run build` succeeds
+- [ ] New functionality has unit tests
+- [ ] TSDoc added for new public APIs
 
-1. Push your changes to your fork:
-   ```bash
-   git push origin feature/your-feature-name
-   ```
+## License
 
-2. Create a Pull Request on GitHub:
-   - Provide a clear title and description
-   - Reference any related issues
-   - Include screenshots if applicable
-
-3. Respond to code review feedback promptly
-
-## Bug Reports
-
-When reporting bugs, please include:
-- Python version
-- Operating system
-- Steps to reproduce
-- Expected vs actual behavior
-- Error messages (if any)
-
-## Feature Requests
-
-For new features:
-- Describe the use case
-- Explain why it would be valuable
-- Consider if it fits the project's scope
-- Be open to discussion about implementation
-
-## Code of Conduct
-
-- Be respectful and inclusive
-- Focus on constructive feedback
-- Help newcomers learn and contribute
-- Maintain a positive environment
-
-## Questions?
-
-Feel free to open an issue for questions or start a discussion in the GitHub Discussions section.
-
-Thank you for contributing!
+By contributing, you agree that your contributions will be licensed under the MIT License.

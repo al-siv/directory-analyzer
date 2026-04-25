@@ -20,6 +20,7 @@ export interface ElectronAPI {
   exportResults: (result: ScanResult, format: OutputFormat) => Promise<{ success: boolean; filePath?: string; error?: string }>
   showOpenDirectoryDialog: () => Promise<{ success: boolean; path?: string }>
   showSaveDialog: (options: { defaultPath?: string; filters?: Electron.FileFilter[] }) => Promise<{ success: boolean; filePath?: string }>
+  getPlatform: () => string
 }
 
 const api: ElectronAPI = {
@@ -54,7 +55,9 @@ const api: ElectronAPI = {
 
   showOpenDirectoryDialog: async () => ipcRenderer.invoke(IPC_CHANNELS.SHOW_OPEN_DIALOG),
 
-  showSaveDialog: async (options) => ipcRenderer.invoke(IPC_CHANNELS.SHOW_SAVE_DIALOG, options)
+  showSaveDialog: async (options) => ipcRenderer.invoke(IPC_CHANNELS.SHOW_SAVE_DIALOG, options),
+
+  getPlatform: (): string => process.platform
 }
 
 contextBridge.exposeInMainWorld('electronAPI', api)
