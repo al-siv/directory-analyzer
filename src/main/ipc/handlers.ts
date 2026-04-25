@@ -9,11 +9,13 @@
 
 import { ipcMain, dialog, BrowserWindow, shell } from 'electron';
 import { IPC_CHANNELS } from '@shared/ipc-channels';
-import type { ScanOptions, ScanResult, OutputFormat } from '@shared/types';
-import { ScanOptionsSchema } from '@shared/schemas';
+import type { ScanOptions } from '@shared/types';
+import { z } from 'zod';
+import { ScanOptionsSchema, ScanResultSchema, OutputFormatSchema } from '@shared/schemas';
 import { DirectoryScanner, ScanCancelledError } from '@main/core/scanner';
 import { exportResults } from '@main/core/exporter';
 import { resolve, isAbsolute, normalize } from 'path';
+import { stat } from 'fs/promises';
 
 let activeScanner: DirectoryScanner | null = null;
 
@@ -25,14 +27,22 @@ let activeScanner: DirectoryScanner | null = null;
  */
 export function registerIpcHandlers(): void {
   ipcMain.handle(IPC_CHANNELS.SCAN_START, async (event, options: ScanOptions) => {
-    const validated = validateScanOptions(options);
+    if (activeScanner !== null) {
+      return { success: false, error: 'A scan is already in progress' };
+    }
+
+    const validated = await validateScanOptions(options);
     activeScanner = new DirectoryScanner(validated);
 
     const window = BrowserWindow.fromWebContents(event.sender);
 
     try {
       const result = await activeScanner.scan(true, (current, total) => {
-        window?.webContents.send(IPC_CHANNELS.SCAN_PROGRESS, {
+        if (!window || window.isDestroyed()) {
+          activeScanner?.cancel();
+          return;
+        }
+        window.webContents.send(IPC_CHANNELS.SCAN_PROGRESS, {
           current,
           total,
           currentPath: '',
@@ -55,33 +65,41 @@ export function registerIpcHandlers(): void {
     activeScanner = null;
   });
 
-  ipcMain.handle(
-    IPC_CHANNELS.EXPORT_RESULTS,
-    async (_event, payload: { result: ScanResult; format: OutputFormat }) => {
-      const { result, format } = payload;
+  ipcMain.handle(IPC_CHANNELS.EXPORT_RESULTS, async (_event, payload: unknown) => {
+    const parsed = z
+      .object({
+        result: ScanResultSchema,
+        format: OutputFormatSchema,
+      })
+      .safeParse(payload);
 
-      const win = BrowserWindow.getFocusedWindow();
-      if (!win) {
-        return { success: false, error: 'No focused window' };
-      }
-
-      const { filePath } = await dialog.showSaveDialog(win, {
-        defaultPath: `results.${format}`,
-        filters: [{ name: format.toUpperCase(), extensions: [format] }],
-      });
-
-      if (!filePath) {
-        return { success: false, error: 'Save dialog cancelled' };
-      }
-
-      try {
-        await exportResults(result, format, filePath);
-        return { success: true, filePath };
-      } catch (err) {
-        return { success: false, error: err instanceof Error ? err.message : String(err) };
-      }
+    if (!parsed.success) {
+      return { success: false, error: 'Invalid export payload' };
     }
-  );
+
+    const { result, format } = parsed.data;
+
+    const win = BrowserWindow.getFocusedWindow();
+    if (!win) {
+      return { success: false, error: 'No focused window' };
+    }
+
+    const { filePath } = await dialog.showSaveDialog(win, {
+      defaultPath: `results.${format}`,
+      filters: [{ name: format.toUpperCase(), extensions: [format] }],
+    });
+
+    if (!filePath) {
+      return { success: false, error: 'Save dialog cancelled' };
+    }
+
+    try {
+      await exportResults(result, format, filePath);
+      return { success: true, filePath };
+    } catch (err) {
+      return { success: false, error: err instanceof Error ? err.message : String(err) };
+    }
+  });
 
   ipcMain.handle(IPC_CHANNELS.SHOW_OPEN_DIALOG, async () => {
     const win = BrowserWindow.getFocusedWindow();
@@ -104,6 +122,22 @@ export function registerIpcHandlers(): void {
     if (typeof dirPath !== 'string' || dirPath.length === 0) {
       return { success: false, error: 'Invalid path' };
     }
+    if (!isAbsolute(dirPath)) {
+      return { success: false, error: 'Path must be absolute' };
+    }
+    if (dirPath.includes('://')) {
+      return { success: false, error: 'URLs are not allowed' };
+    }
+
+    try {
+      const s = await stat(dirPath);
+      if (!s.isDirectory()) {
+        return { success: false, error: 'Path is not a directory' };
+      }
+    } catch {
+      return { success: false, error: 'Path does not exist or is inaccessible' };
+    }
+
     const error = await shell.openPath(dirPath);
     return { success: error === '', error: error || undefined };
   });
@@ -118,13 +152,25 @@ export function registerIpcHandlers(): void {
  * @returns Sanitized ScanOptions.
  * @throws {Error} If validation fails.
  */
-function validateScanOptions(options: unknown): ScanOptions {
+async function validateScanOptions(options: unknown): Promise<ScanOptions> {
   const parsed = ScanOptionsSchema.parse(options);
 
   const targetPath = resolve(normalize(parsed.targetPath));
 
   if (!isAbsolute(targetPath)) {
     throw new Error('targetPath must be absolute');
+  }
+
+  try {
+    const st = await stat(targetPath);
+    if (!st.isDirectory()) {
+      throw new Error('targetPath must be a directory');
+    }
+  } catch (err) {
+    if (err instanceof Error && err.message === 'targetPath must be a directory') {
+      throw err;
+    }
+    throw new Error('targetPath does not exist or is inaccessible');
   }
 
   return {

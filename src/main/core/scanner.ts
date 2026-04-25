@@ -45,6 +45,9 @@ export class ScanCancelledError extends Error {
  * Orchestrates directory traversal, file classification, and result aggregation.
  */
 export class DirectoryScanner {
+  private static readonly SCAN_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
+  private static readonly MAX_FILES_LIMIT = 1_000_000;
+
   private readonly options: ScanOptions;
   private readonly classifier: ContentClassifier;
   private readonly errorDirectories: string[] = [];
@@ -53,6 +56,7 @@ export class DirectoryScanner {
   private totalFiles = 0;
   private totalSize = 0;
   private abortController: AbortController | null = null;
+  private scanTimeoutId: NodeJS.Timeout | null = null;
 
   constructor(options: ScanOptions) {
     this.options = options;
@@ -73,6 +77,9 @@ export class DirectoryScanner {
   ): Promise<ScanResult> {
     this.abortController = new AbortController();
     const signal = this.abortController.signal;
+    this.scanTimeoutId = setTimeout(() => {
+      this.abortController?.abort();
+    }, DirectoryScanner.SCAN_TIMEOUT_MS);
 
     const startTime = Date.now();
 
@@ -112,6 +119,8 @@ export class DirectoryScanner {
       }
       throw new Error(`Scan failed: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
+      clearTimeout(this.scanTimeoutId);
+      this.scanTimeoutId = null;
       this.abortController = null;
     }
   }
@@ -126,9 +135,14 @@ export class DirectoryScanner {
   /**
    * Collect every directory under the root iteratively (avoids stack overflow).
    */
-  private async collectAllDirectories(rootPath: string, signal: AbortSignal): Promise<string[]> {
+  private async collectAllDirectories(
+    rootPath: string,
+    signal: AbortSignal,
+    maxDepth = 50,
+    maxDirectories = 1_000_000
+  ): Promise<string[]> {
     const dirs: string[] = [rootPath];
-    const stack: string[] = [rootPath];
+    const stack: Array<{ path: string; depth: number }> = [{ path: rootPath, depth: 0 }];
     const visited = new Set<string>();
 
     while (stack.length > 0) {
@@ -136,8 +150,16 @@ export class DirectoryScanner {
         throw new ScanCancelledError();
       }
 
-      const current = stack.pop();
-      if (!current) break;
+      if (dirs.length >= maxDirectories) {
+        break;
+      }
+
+      const item = stack.pop();
+      if (!item) break;
+      const { path: current, depth } = item;
+      if (depth >= maxDepth) {
+        continue;
+      }
 
       try {
         const subdirs = await getSubdirectoryPaths(current, this.options.includeHidden);
@@ -153,7 +175,7 @@ export class DirectoryScanner {
             // If realpath fails, fall back to the raw path and continue.
           }
           dirs.push(full);
-          stack.push(full);
+          stack.push({ path: full, depth: depth + 1 });
         }
       } catch {
         this.errorDirectories.push(current);
@@ -280,7 +302,9 @@ export class DirectoryScanner {
 
         const fileInfo = this.classifier.classifyFileWithInfo(filePath, fileSize);
         directoryFiles.push(fileInfo);
-        this.allFiles.push(fileInfo);
+        if (this.allFiles.length < DirectoryScanner.MAX_FILES_LIMIT) {
+          this.allFiles.push(fileInfo);
+        }
         this.totalFiles += 1;
         this.totalSize += fileSize;
       }

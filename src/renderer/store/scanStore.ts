@@ -51,6 +51,12 @@ const initialState = {
   selectedDirectoryPath: null,
 };
 
+function clampNumber(value: unknown, min: number, max: number, fallback: number): number {
+  const num = Number(value);
+  if (!Number.isFinite(num)) return fallback;
+  return Math.max(min, Math.min(max, num));
+}
+
 export const useScanStore = create<ScanStore>()(
   persist(
     set => ({
@@ -110,6 +116,18 @@ export const useScanStore = create<ScanStore>()(
         minSizeMb: state.minSizeMb,
         extensions: state.extensions,
       }),
+      merge: (persistedState, currentState) => {
+        const p = persistedState as Partial<ScanStore>;
+        return {
+          ...currentState,
+          theme: p.theme === 'light' ? 'light' : 'dark',
+          includeHidden:
+            typeof p.includeHidden === 'boolean' ? p.includeHidden : currentState.includeHidden,
+          topCount: clampNumber(p.topCount, 1, 10000, currentState.topCount),
+          minSizeMb: clampNumber(p.minSizeMb, 0, Infinity, currentState.minSizeMb),
+          extensions: typeof p.extensions === 'string' ? p.extensions : currentState.extensions,
+        };
+      },
     }
   )
 );

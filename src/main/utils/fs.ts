@@ -115,8 +115,11 @@ export async function* getDirectFiles(directory: string): AsyncGenerator<string>
         yield entry.name;
       }
     }
-  } catch {
-    // Swallow permission errors silently — caller decides whether to log.
+  } catch (err) {
+    console.warn(
+      `[fs] Failed to list files in "${directory}":`,
+      err instanceof Error ? err.message : String(err)
+    );
   }
 }
 
@@ -140,7 +143,10 @@ export async function* getSubdirectories(
         }
       }
     }
-  } catch {
-    // Swallow permission errors silently.
+  } catch (err) {
+    console.warn(
+      `[fs] Failed to list subdirectories in "${directory}":`,
+      err instanceof Error ? err.message : String(err)
+    );
   }
 }

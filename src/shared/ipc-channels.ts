@@ -13,12 +13,6 @@ export const IPC_CHANNELS = {
   /** Main -> Renderer: progress update. Payload: ScanProgressUpdate */
   SCAN_PROGRESS: 'scan:progress',
 
-  /** Main -> Renderer: scan completed. Payload: ScanResult */
-  SCAN_COMPLETE: 'scan:complete',
-
-  /** Main -> Renderer: scan failed. Payload: string (error message) */
-  SCAN_ERROR: 'scan:error',
-
   /** Renderer -> Main: request cancellation. */
   SCAN_CANCEL: 'scan:cancel',
 

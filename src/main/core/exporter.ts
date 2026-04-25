@@ -109,6 +109,14 @@ function generateTextExport(result: ScanResult): string {
 /**
  * Build a CSV export.
  */
+function escapeCsvField(value: string): string {
+  // Prefix formula-triggering characters to prevent CSV injection in spreadsheet software.
+  if (/^[\u003D+\-@\t\r]/.test(value)) {
+    return `"'${value}"`;
+  }
+  return value;
+}
+
 function generateCsvExport(result: ScanResult): string {
   const stats = result.statistics;
   const lines: string[] = [];
@@ -129,7 +137,7 @@ function generateCsvExport(result: ScanResult): string {
     const pct = totalSize > 0 ? (d.sizeBytes / totalSize) * 100 : 0;
     const pctStr = formatPercentage(pct);
     lines.push(
-      `${String(i + 1)},"${d.path}",${String(d.sizeBytes)},${bytesToHumanReadable(d.sizeBytes)},${pctStr},${String(d.fileCount)}`
+      `${String(i + 1)},"${escapeCsvField(d.path)}",${String(d.sizeBytes)},${bytesToHumanReadable(d.sizeBytes)},${pctStr},${String(d.fileCount)}`
     );
   }
 

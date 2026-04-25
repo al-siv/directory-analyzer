@@ -19,5 +19,7 @@ export const PROGRESS_PERCENTAGE_INTERVAL = 5;
 /** Default number of top directories shown. */
 export const DEFAULT_TOP_COUNT = 50;
 
-/** Maximum worker threads for parallel scanning. */
-export const MAX_WORKERS = 4;
+import { cpus } from 'os';
+
+/** Maximum concurrent workers for parallel scanning. */
+export const MAX_WORKERS = Math.max(1, cpus().length);
