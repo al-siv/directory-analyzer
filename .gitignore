@@ -181,3 +181,14 @@ playwright/.cache/
 
 # Vite
 .vite/
+
+# TypeScript compilation artifacts
+.tsc-root/
+
+# Compiled config files (source is *.ts)
+*.config.js
+*.config.d.ts
+
+# Generated JS and declaration files in src/
+src/**/*.js
+src/**/*.d.ts

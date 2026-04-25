@@ -1,20 +1,20 @@
-import { useScanStore } from '@renderer/store/scanStore'
-import { ScanConfigForm } from '@renderer/components/ScanConfigForm'
-import { ScanProgress } from '@renderer/components/ScanProgress'
-import { ResultsTable } from '@renderer/components/ResultsTable'
-import { CategoryChart } from '@renderer/components/CategoryChart'
-import { DirectoryDetail } from '@renderer/components/DirectoryDetail'
-import { ExportBar } from '@renderer/components/ExportBar'
-import { SummaryCards } from '@renderer/components/SummaryCards'
-import { ThemeToggle } from '@renderer/components/ThemeToggle'
-import { HardDrive } from 'lucide-react'
+import { useScanStore } from '@renderer/store/scanStore';
+import { ScanConfigForm } from '@renderer/components/ScanConfigForm';
+import { ScanProgress } from '@renderer/components/ScanProgress';
+import { ResultsTable } from '@renderer/components/ResultsTable';
+import { CategoryChart } from '@renderer/components/CategoryChart';
+import { DirectoryDetail } from '@renderer/components/DirectoryDetail';
+import { ExportBar } from '@renderer/components/ExportBar';
+import { SummaryCards } from '@renderer/components/SummaryCards';
+import { ThemeToggle } from '@renderer/components/ThemeToggle';
+import { HardDrive } from 'lucide-react';
 
-const isMac = window.electronAPI.getPlatform() === 'darwin'
+const isMac = window.electronAPI.getPlatform() === 'darwin';
 
 export default function App(): JSX.Element {
-  const appState = useScanStore((s) => s.appState)
-  const scanResult = useScanStore((s) => s.scanResult)
-  const error = useScanStore((s) => s.error)
+  const appState = useScanStore(s => s.appState);
+  const scanResult = useScanStore(s => s.scanResult);
+  const error = useScanStore(s => s.error);
 
   return (
     <div className="flex h-screen flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
@@ -24,7 +24,10 @@ export default function App(): JSX.Element {
         style={{ ['WebkitAppRegion' as string]: 'drag' }}
       >
         <div className="flex items-center gap-3">
-          <HardDrive className="h-6 w-6 text-blue-600 dark:text-blue-400" style={{ ['WebkitAppRegion' as string]: 'no-drag' }} />
+          <HardDrive
+            className="h-6 w-6 text-blue-600 dark:text-blue-400"
+            style={{ ['WebkitAppRegion' as string]: 'no-drag' }}
+          />
           <h1 className="text-lg font-semibold">Directory Analyzer</h1>
           <span className="rounded bg-slate-200 px-2 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-400">
             v2.0.0
@@ -65,5 +68,5 @@ export default function App(): JSX.Element {
         </div>
       </main>
     </div>
-  )
+  );
 }

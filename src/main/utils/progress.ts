@@ -8,15 +8,14 @@
  */
 
 export interface ProgressCallback {
-  (current: number, total: number): void
+  (current: number, total: number): void;
 }
 
 export class ProgressReporter {
-  private readonly total: number | null
-  private readonly prefix: string
-  private readonly onUpdate: ProgressCallback | null
-  private current = 0
-  private lastReported = -1
+  private readonly total: number | null;
+  private readonly onUpdate: ProgressCallback | null;
+  private current = 0;
+  private lastReported = -1;
 
   /**
    * @param total - Total expected items, or null if unknown.
@@ -25,12 +24,11 @@ export class ProgressReporter {
    */
   constructor(
     total: number | null = null,
-    prefix = 'Progress',
+    _prefix = 'Progress',
     onUpdate: ProgressCallback | null = null
   ) {
-    this.total = total ?? null
-    this.prefix = prefix
-    this.onUpdate = onUpdate
+    this.total = total ?? null;
+    this.onUpdate = onUpdate;
   }
 
   /**
@@ -39,16 +37,16 @@ export class ProgressReporter {
    * @param count - Amount to increment. Default 1.
    */
   update(count = 1): void {
-    this.current += count
+    this.current += count;
 
     if (this.total !== null && this.total > 0) {
-      const percent = Math.floor((this.current / this.total) * 100)
+      const percent = Math.floor((this.current / this.total) * 100);
       if (percent > this.lastReported && percent % 5 === 0) {
-        this.lastReported = percent
-        this.onUpdate?.(this.current, this.total)
+        this.lastReported = percent;
+        this.onUpdate?.(this.current, this.total);
       }
     } else if (this.current % 1000 === 0) {
-      this.onUpdate?.(this.current, 0)
+      this.onUpdate?.(this.current, 0);
     }
   }
 
@@ -57,9 +55,9 @@ export class ProgressReporter {
    */
   finish(): void {
     if (this.total !== null && this.total > 0) {
-      this.onUpdate?.(this.current, this.total)
+      this.onUpdate?.(this.current, this.total);
     } else {
-      this.onUpdate?.(this.current, 0)
+      this.onUpdate?.(this.current, 0);
     }
   }
 }

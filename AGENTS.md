@@ -45,7 +45,7 @@ This project is a **public-facing demonstration of engineering excellence**. All
 | Gate | Tool | Rule |
 |------|------|------|
 | **Type Safety** | TypeScript | `strict: true`, no `any` in core logic, explicit return types |
-| **Linting** | ESLint + `@typescript-eslint` | No warnings in CI, `no-explicit-any` enforced |
+| **Linting** | ESLint + `@typescript-eslint/strict-type-checked` | No warnings in CI, `no-explicit-any` enforced, type-aware rules active |
 | **Security Linting** | `eslint-plugin-security` + `eslint-plugin-security-node` | Detect unsafe regex, path traversal, eval, child_process risks |
 | **Formatting** | Prettier | Consistent style, 2-space indent, single quotes |
 | **Pre-commit** | Husky + lint-staged | Block commit if lint/tests fail |
@@ -116,6 +116,7 @@ This project is a **public-facing demonstration of engineering excellence**. All
 | React Tests | @testing-library/react 15+ | Component testing |
 | Linting | ESLint 8+ + Prettier 3+ | Code quality |
 | Security Lint | eslint-plugin-security 2+ | Security patterns |
+| Validation | Zod 3.23+ | Runtime schema validation for IPC boundaries |
 | IPC | Raw typed IPC (no wrapper lib) | Full control, zero abstraction overhead |
 
 ### Module Mapping: Python → TypeScript
@@ -145,7 +146,9 @@ directory-analyzer/
 ├── electron.vite.config.ts   # Vite config for main/preload/renderer
 ├── package.json              # pnpm, scripts, dependencies
 ├── pnpm-lock.yaml            # Deterministic lockfile
-├── tsconfig.json             # Root TS config (strict)
+├── tsconfig.json             # Solution-only root (project references)
+├── tsconfig.main.json        # Main process + shared + tests
+├── tsconfig.web.json         # Renderer + preload + shared
 ├── tsconfig.node.json        # Build tooling TS config
 ├── vitest.config.ts          # Unit test config
 ├── playwright.config.ts      # E2E test config
@@ -155,7 +158,8 @@ directory-analyzer/
 │   ├── shared/               # Code shared between main and renderer
 │   │   ├── types.ts          # All interfaces (ScanOptions, DirectoryInfo, etc.)
 │   │   ├── constants.ts      # BYTES_PER_KB, MINIMUM_PERCENTAGE_DISPLAY
-│   │   └── ipc-channels.ts   # IPC channel constants (type-safe)
+│   │   ├── ipc-channels.ts   # IPC channel constants (type-safe)
+│   │   └── schemas.ts        # Zod schemas for runtime IPC validation
 │   │
 │   ├── main/                 # Electron main process (Node.js)
 │   │   ├── index.ts          # Main entry, window creation, menu

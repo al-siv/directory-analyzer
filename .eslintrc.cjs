@@ -3,17 +3,18 @@ module.exports = {
   env: { browser: true, node: true, es2020: true },
   extends: [
     'eslint:recommended',
-    'plugin:@typescript-eslint/recommended',
+    'plugin:@typescript-eslint/strict-type-checked',
     'plugin:react-hooks/recommended',
     'plugin:security/recommended-legacy',
     'plugin:security-node/recommended',
     'prettier'
   ],
-  ignorePatterns: ['dist', 'out', 'node_modules', '*.cjs', '*.mjs', 'tests'],
+  ignorePatterns: ['dist', 'out', 'node_modules', '*.cjs', '*.mjs', '*.d.ts'],
   parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaVersion: 'latest',
-    sourceType: 'module'
+    sourceType: 'module',
+    project: './tsconfig.main.json'
   },
   plugins: ['@typescript-eslint', 'react-refresh', 'security', 'security-node'],
   rules: {
@@ -36,14 +37,27 @@ module.exports = {
       rules: {
         'no-console': 'off',
         'security/detect-non-literal-fs-filename': 'off',
-        'security-node/detect-unhandled-async-errors': 'off'
+        'security-node/detect-unhandled-async-errors': 'off',
+        '@typescript-eslint/no-floating-promises': 'error'
+      }
+    },
+    {
+      files: ['src/renderer/**/*', 'src/preload/**/*'],
+      parserOptions: {
+        project: './tsconfig.web.json'
+      },
+      rules: {
+        '@typescript-eslint/no-floating-promises': 'error'
+      }
+    },
+    {
+      files: ['*.config.ts'],
+      parserOptions: {
+        project: './tsconfig.node.json'
       }
     },
     {
       files: ['*.test.ts', '*.spec.ts', 'tests/**/*'],
-      parserOptions: {
-        project: null
-      },
       rules: {
         '@typescript-eslint/no-explicit-any': 'off',
         '@typescript-eslint/unbound-method': 'off',
@@ -51,7 +65,9 @@ module.exports = {
         '@typescript-eslint/no-unsafe-assignment': 'off',
         '@typescript-eslint/no-unsafe-call': 'off',
         '@typescript-eslint/no-unsafe-return': 'off',
-        '@typescript-eslint/no-unsafe-argument': 'off'
+        '@typescript-eslint/no-unsafe-argument': 'off',
+        '@typescript-eslint/no-non-null-assertion': 'off',
+        'security-node/detect-unhandled-async-errors': 'off'
       }
     }
   ]

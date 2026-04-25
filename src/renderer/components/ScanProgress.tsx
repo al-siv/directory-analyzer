@@ -1,13 +1,13 @@
-import { useScanStore } from '@renderer/store/scanStore'
-import { Loader2, FolderSearch } from 'lucide-react'
+import { useScanStore } from '@renderer/store/scanStore';
+import { Loader2, FolderSearch } from 'lucide-react';
 
 export function ScanProgress(): JSX.Element {
-  const progress = useScanStore((s) => s.progress)
-  const scanResult = useScanStore((s) => s.scanResult)
+  const progress = useScanStore(s => s.progress);
+  const scanResult = useScanStore(s => s.scanResult);
 
-  const current = progress?.current ?? 0
-  const total = progress?.total ?? 0
-  const pct = total > 0 ? Math.round((current / total) * 100) : 0
+  const current = progress?.current ?? 0;
+  const total = progress?.total ?? 0;
+  const pct = total > 0 ? Math.round((current / total) * 100) : 0;
 
   return (
     <div className="flex flex-col items-center justify-center rounded-lg border border-slate-200 bg-white py-12 dark:border-slate-700 dark:bg-slate-900">
@@ -24,7 +24,7 @@ export function ScanProgress(): JSX.Element {
         <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
           <div
             className="h-full rounded-full bg-blue-600 transition-all duration-300 dark:bg-blue-400"
-            style={{ width: `${pct}%` }}
+            style={{ width: `${String(pct)}%` }}
           />
         </div>
       </div>
@@ -36,5 +36,5 @@ export function ScanProgress(): JSX.Element {
         </p>
       )}
     </div>
-  )
+  );
 }

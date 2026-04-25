@@ -7,16 +7,27 @@
  * @module main/core/scanner
  */
 
-import { join } from 'path'
-import type { DirectoryInfo, FileInfo, ScanOptions, ScanResult, ScanStatistics } from '@shared/types'
-import { ContentClassifier } from './classifier'
-import { isAccessibleDirectory, getDirectFiles, safeGetFileSize, getSubdirectories } from '@main/utils/fs'
-import { ProgressReporter } from '@main/utils/progress'
-import { MAX_WORKERS } from '@shared/constants'
+import { join } from 'path';
+import type {
+  DirectoryInfo,
+  FileInfo,
+  ScanOptions,
+  ScanResult,
+  ScanStatistics,
+} from '@shared/types';
+import { ContentClassifier } from './classifier';
+import {
+  isAccessibleDirectory,
+  getDirectFiles,
+  safeGetFileSize,
+  getSubdirectories,
+} from '@main/utils/fs';
+import { ProgressReporter } from '@main/utils/progress';
+import { MAX_WORKERS } from '@shared/constants';
 
 interface ScanDirectoryResult {
-  dirInfo: DirectoryInfo
-  files: FileInfo[]
+  dirInfo: DirectoryInfo;
+  files: FileInfo[];
 }
 
 /**
@@ -24,8 +35,8 @@ interface ScanDirectoryResult {
  */
 export class ScanCancelledError extends Error {
   constructor() {
-    super('Scan cancelled by user')
-    this.name = 'ScanCancelledError'
+    super('Scan cancelled by user');
+    this.name = 'ScanCancelledError';
   }
 }
 
@@ -33,18 +44,18 @@ export class ScanCancelledError extends Error {
  * Orchestrates directory traversal, file classification, and result aggregation.
  */
 export class DirectoryScanner {
-  private readonly options: ScanOptions
-  private readonly classifier: ContentClassifier
-  private readonly errorDirectories: string[] = []
-  private readonly allFiles: FileInfo[] = []
-  private totalDirectories = 0
-  private totalFiles = 0
-  private totalSize = 0
-  private abortController: AbortController | null = null
+  private readonly options: ScanOptions;
+  private readonly classifier: ContentClassifier;
+  private readonly errorDirectories: string[] = [];
+  private readonly allFiles: FileInfo[] = [];
+  private totalDirectories = 0;
+  private totalFiles = 0;
+  private totalSize = 0;
+  private abortController: AbortController | null = null;
 
   constructor(options: ScanOptions) {
-    this.options = options
-    this.classifier = new ContentClassifier()
+    this.options = options;
+    this.classifier = new ContentClassifier();
   }
 
   /**
@@ -59,31 +70,31 @@ export class DirectoryScanner {
     useParallel = true,
     onProgress?: (current: number, total: number) => void
   ): Promise<ScanResult> {
-    this.abortController = new AbortController()
-    const signal = this.abortController.signal
+    this.abortController = new AbortController();
+    const signal = this.abortController.signal;
 
-    const startTime = Date.now()
+    const startTime = Date.now();
 
     try {
-      const allDirPaths = await this.collectAllDirectories(this.options.targetPath, signal)
-      this.totalDirectories = allDirPaths.length
+      const allDirPaths = await this.collectAllDirectories(this.options.targetPath, signal);
+      this.totalDirectories = allDirPaths.length;
 
-      const reporter = new ProgressReporter(allDirPaths.length, 'Scanning', onProgress ?? null)
+      const reporter = new ProgressReporter(allDirPaths.length, 'Scanning', onProgress ?? null);
 
-      let results: DirectoryInfo[]
+      let results: DirectoryInfo[];
 
       if (useParallel && allDirPaths.length > 1) {
-        results = await this.scanParallel(allDirPaths, reporter, signal)
+        results = await this.scanParallel(allDirPaths, reporter, signal);
       } else {
-        results = await this.scanSequential(allDirPaths, reporter, signal)
+        results = await this.scanSequential(allDirPaths, reporter, signal);
       }
 
-      reporter.finish()
+      reporter.finish();
 
-      results.sort((a, b) => b.sizeBytes - a.sizeBytes)
+      results.sort((a, b) => b.sizeBytes - a.sizeBytes);
 
-      const duration = (Date.now() - startTime) / 1000
-      const statistics = this.createScanStatistics(results, duration)
+      const duration = (Date.now() - startTime) / 1000;
+      const statistics = this.createScanStatistics(results, duration);
 
       return {
         directories: results,
@@ -91,15 +102,15 @@ export class DirectoryScanner {
         errorCount: this.errorDirectories.length,
         scanDuration: duration,
         scanOptions: this.options,
-        statistics
-      }
+        statistics,
+      };
     } catch (err) {
       if (err instanceof ScanCancelledError) {
-        throw err
+        throw err;
       }
-      throw new Error(`Scan failed: ${err instanceof Error ? err.message : String(err)}`)
+      throw new Error(`Scan failed: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
-      this.abortController = null
+      this.abortController = null;
     }
   }
 
@@ -107,36 +118,37 @@ export class DirectoryScanner {
    * Cancel an in-flight scan.
    */
   cancel(): void {
-    this.abortController?.abort()
+    this.abortController?.abort();
   }
 
   /**
    * Collect every directory under the root iteratively (avoids stack overflow).
    */
   private async collectAllDirectories(rootPath: string, signal: AbortSignal): Promise<string[]> {
-    const dirs: string[] = [rootPath]
-    const stack: string[] = [rootPath]
+    const dirs: string[] = [rootPath];
+    const stack: string[] = [rootPath];
 
     while (stack.length > 0) {
       if (signal.aborted) {
-        throw new ScanCancelledError()
+        throw new ScanCancelledError();
       }
 
-      const current = stack.pop()!
+      const current = stack.pop();
+      if (!current) break;
 
       try {
-        const subdirs = await getSubdirectoryPaths(current, this.options.includeHidden)
+        const subdirs = await getSubdirectoryPaths(current, this.options.includeHidden);
         for (const sub of subdirs) {
-          const full = join(current, sub)
-          dirs.push(full)
-          stack.push(full)
+          const full = join(current, sub);
+          dirs.push(full);
+          stack.push(full);
         }
       } catch {
-        this.errorDirectories.push(current)
+        this.errorDirectories.push(current);
       }
     }
 
-    return dirs
+    return dirs;
   }
 
   /**
@@ -147,21 +159,21 @@ export class DirectoryScanner {
     reporter: ProgressReporter,
     signal: AbortSignal
   ): Promise<DirectoryInfo[]> {
-    const results: DirectoryInfo[] = []
+    const results: DirectoryInfo[] = [];
 
     for (const dirPath of dirPaths) {
       if (signal.aborted) {
-        throw new ScanCancelledError()
+        throw new ScanCancelledError();
       }
 
-      const { dirInfo } = await this.scanSingleDirectory(dirPath)
+      const { dirInfo } = await this.scanSingleDirectory(dirPath);
       if (dirInfo.sizeBytes >= this.options.minSizeBytes) {
-        results.push(dirInfo)
+        results.push(dirInfo);
       }
-      reporter.update()
+      reporter.update();
     }
 
-    return results
+    return results;
   }
 
   /**
@@ -177,101 +189,102 @@ export class DirectoryScanner {
     reporter: ProgressReporter,
     signal: AbortSignal
   ): Promise<DirectoryInfo[]> {
-    const results: DirectoryInfo[] = []
-    const queue = [...dirPaths]
-    const inFlight = new Set<Promise<void>>()
+    const results: DirectoryInfo[] = [];
+    const queue = [...dirPaths];
+    const inFlight = new Set<Promise<void>>();
 
     const processOne = async (dirPath: string): Promise<void> => {
       if (signal.aborted) {
-        throw new ScanCancelledError()
+        throw new ScanCancelledError();
       }
-      const { dirInfo } = await this.scanSingleDirectory(dirPath)
+      const { dirInfo } = await this.scanSingleDirectory(dirPath);
       if (dirInfo.sizeBytes >= this.options.minSizeBytes) {
-        results.push(dirInfo)
+        results.push(dirInfo);
       }
-      reporter.update()
-    }
+      reporter.update();
+    };
 
     while (queue.length > 0 || inFlight.size > 0) {
       if (signal.aborted) {
-        throw new ScanCancelledError()
+        throw new ScanCancelledError();
       }
 
       while (inFlight.size < MAX_WORKERS && queue.length > 0) {
-        const dirPath = queue.shift()!
+        const dirPath = queue.shift();
+        if (!dirPath) break;
         const task = processOne(dirPath).finally(() => {
-          inFlight.delete(task)
-        })
-        inFlight.add(task)
+          inFlight.delete(task);
+        });
+        inFlight.add(task);
       }
 
       if (inFlight.size >= MAX_WORKERS || queue.length === 0) {
-        await Promise.race(inFlight)
+        await Promise.race(inFlight);
       }
     }
 
-    return results
+    return results;
   }
 
   /**
    * Scan a single directory: sum direct file sizes, classify files, apply filters.
    */
   private async scanSingleDirectory(dirPath: string): Promise<ScanDirectoryResult> {
-    const scanTime = Date.now()
+    const scanTime = Date.now();
 
-    const isAccessible = await isAccessibleDirectory(dirPath)
+    const isAccessible = await isAccessibleDirectory(dirPath);
     if (!isAccessible) {
-      this.errorDirectories.push(dirPath)
+      this.errorDirectories.push(dirPath);
       return {
         dirInfo: {
           path: dirPath,
           sizeBytes: 0,
           fileCount: 0,
           lastScanned: scanTime,
-          errorMessage: 'Permission denied or directory inaccessible'
+          errorMessage: 'Permission denied or directory inaccessible',
         },
-        files: []
-      }
+        files: [],
+      };
     }
 
-    let totalSize = 0
-    let fileCount = 0
-    const directoryFiles: FileInfo[] = []
+    let totalSize = 0;
+    let fileCount = 0;
+    const directoryFiles: FileInfo[] = [];
 
     try {
       for await (const fileName of getDirectFiles(dirPath)) {
-        const filePath = join(dirPath, fileName)
-        const extension = getExtension(fileName)
+        const filePath = join(dirPath, fileName);
+        const extension = getExtension(fileName);
 
         if (this.options.extensionFilter !== null && this.options.extensionFilter.length > 0) {
           if (!this.options.extensionFilter.includes(extension)) {
-            continue
+            continue;
           }
         }
 
-        const fileSize = await safeGetFileSize(filePath)
-        totalSize += fileSize
-        fileCount += 1
+        const fileSize = await safeGetFileSize(filePath);
+        totalSize += fileSize;
+        fileCount += 1;
 
-        const fileInfo = this.classifier.classifyFileWithInfo(filePath, fileSize)
-        directoryFiles.push(fileInfo)
-        this.allFiles.push(fileInfo)
-        this.totalFiles += 1
-        this.totalSize += fileSize
+        const fileInfo = this.classifier.classifyFileWithInfo(filePath, fileSize);
+        directoryFiles.push(fileInfo);
+        this.allFiles.push(fileInfo);
+        this.totalFiles += 1;
+        this.totalSize += fileSize;
       }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err)
-      this.errorDirectories.push(dirPath)
+      const msg = err instanceof Error ? err.message : String(err);
+      this.errorDirectories.push(dirPath);
       return {
         dirInfo: {
           path: dirPath,
           sizeBytes: 0,
           fileCount: 0,
           lastScanned: scanTime,
-          errorMessage: msg
+          errorMessage: msg,
         },
-        files: []
-      }
+        files: [],
+      };
     }
 
     return {
@@ -280,24 +293,24 @@ export class DirectoryScanner {
         sizeBytes: totalSize,
         fileCount,
         lastScanned: scanTime,
-        errorMessage: null
+        errorMessage: null,
       },
-      files: directoryFiles
-    }
+      files: directoryFiles,
+    };
   }
 
   /**
    * Build aggregate statistics from the collected file data.
    */
-  private createScanStatistics(results: DirectoryInfo[], duration: number): ScanStatistics {
+  private createScanStatistics(_results: DirectoryInfo[], duration: number): ScanStatistics {
     return {
       totalDirectories: this.totalDirectories,
       totalFiles: this.totalFiles,
       totalSizeBytes: this.totalSize,
       scanDuration: duration,
       categoryBreakdown: this.classifier.getCategoryStatistics(this.allFiles),
-      fileCountByCategory: this.classifier.getFileCountByCategory(this.allFiles)
-    }
+      fileCountByCategory: this.classifier.getFileCountByCategory(this.allFiles),
+    };
   }
 }
 
@@ -305,17 +318,17 @@ export class DirectoryScanner {
  * Helper: get normalized extension from a file name.
  */
 function getExtension(fileName: string): string {
-  const idx = fileName.lastIndexOf('.')
-  return idx >= 0 ? fileName.slice(idx).toLowerCase() : ''
+  const idx = fileName.lastIndexOf('.');
+  return idx >= 0 ? fileName.slice(idx).toLowerCase() : '';
 }
 
 /**
  * Helper: list subdirectory names in a directory.
  */
 async function getSubdirectoryPaths(parent: string, includeHidden: boolean): Promise<string[]> {
-  const names: string[] = []
+  const names: string[] = [];
   for await (const name of getSubdirectories(parent, includeHidden)) {
-    names.push(name)
+    names.push(name);
   }
-  return names
+  return names;
 }

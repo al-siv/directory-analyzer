@@ -7,7 +7,7 @@
  * @module main/utils/format
  */
 
-import { BYTES_PER_KB, MINIMUM_PERCENTAGE_DISPLAY } from '@shared/constants'
+import { BYTES_PER_KB, MINIMUM_PERCENTAGE_DISPLAY } from '@shared/constants';
 
 /**
  * Convert a byte count to a human-readable string.
@@ -27,27 +27,27 @@ import { BYTES_PER_KB, MINIMUM_PERCENTAGE_DISPLAY } from '@shared/constants'
  */
 export function bytesToHumanReadable(sizeBytes: number): string {
   if (sizeBytes < 0) {
-    throw new RangeError('sizeBytes must be >= 0')
+    throw new RangeError('sizeBytes must be >= 0');
   }
 
   if (sizeBytes === 0) {
-    return '0 B'
+    return '0 B';
   }
 
-  const units = ['B', 'KB', 'MB', 'GB', 'TB']
-  let size = Number(sizeBytes)
+  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+  let size = Number(sizeBytes);
 
   for (const unit of units) {
     if (size < BYTES_PER_KB) {
       if (unit === 'B') {
-        return `${Math.floor(size)} ${unit}`
+        return `${String(Math.floor(size))} ${unit}`;
       }
-      return `${size.toFixed(1)} ${unit}`
+      return `${size.toFixed(1)} ${unit}`;
     }
-    size /= BYTES_PER_KB
+    size /= BYTES_PER_KB;
   }
 
-  return `${size.toFixed(1)} PB`
+  return `${size.toFixed(1)} PB`;
 }
 
 /**
@@ -64,9 +64,9 @@ export function bytesToHumanReadable(sizeBytes: number): string {
  */
 export function formatPercentage(percentage: number): string {
   if (percentage < MINIMUM_PERCENTAGE_DISPLAY) {
-    return `<${MINIMUM_PERCENTAGE_DISPLAY.toFixed(2)}%`
+    return `<${MINIMUM_PERCENTAGE_DISPLAY.toFixed(2)}%`;
   }
-  return `${percentage.toFixed(2)}%`
+  return `${percentage.toFixed(2)}%`;
 }
 
 /**
@@ -78,11 +78,11 @@ export function formatPercentage(percentage: number): string {
  */
 export function formatPathForDisplay(path: string, maxLength = 80): string {
   if (path.length <= maxLength) {
-    return path
+    return path;
   }
-  const startLen = Math.floor(maxLength / 2) - 3
-  const endLen = maxLength - startLen - 3
-  return `${path.slice(0, startLen)}...${path.slice(-endLen)}`
+  const startLen = Math.floor(maxLength / 2) - 3;
+  const endLen = maxLength - startLen - 3;
+  return `${path.slice(0, startLen)}...${path.slice(-endLen)}`;
 }
 
 /**
@@ -98,6 +98,6 @@ export function formatPathForDisplay(path: string, maxLength = 80): string {
  * pluralize(5, 'file')   // "5 files"
  */
 export function pluralize(count: number, singular: string, plural?: string): string {
-  const resolvedPlural = plural ?? `${singular}s`
-  return `${count} ${count === 1 ? singular : resolvedPlural}`
+  const resolvedPlural = plural ?? `${singular}s`;
+  return `${String(count)} ${count === 1 ? singular : resolvedPlural}`;
 }

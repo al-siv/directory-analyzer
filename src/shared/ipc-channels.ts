@@ -29,8 +29,8 @@ export const IPC_CHANNELS = {
   SHOW_OPEN_DIALOG: 'dialog:open-directory',
 
   /** Renderer -> Main: show native save-file dialog. */
-  SHOW_SAVE_DIALOG: 'dialog:save-file'
-} as const
+  SHOW_SAVE_DIALOG: 'dialog:save-file',
+} as const;
 
 /** Union type of all channel names. */
-export type IpcChannel = (typeof IPC_CHANNELS)[keyof typeof IPC_CHANNELS]
+export type IpcChannel = (typeof IPC_CHANNELS)[keyof typeof IPC_CHANNELS];

@@ -1,31 +1,33 @@
-import { useScanStore } from '@renderer/store/scanStore'
-import { useMemo } from 'react'
-import { FolderOpen, FileText, BarChart3, ExternalLink } from 'lucide-react'
+import { useScanStore } from '@renderer/store/scanStore';
+import { useMemo } from 'react';
+import { FolderOpen, FileText, BarChart3, ExternalLink } from 'lucide-react';
 
 export function DirectoryDetail(): JSX.Element {
-  const scanResult = useScanStore((s) => s.scanResult)
-  const selectedPath = useScanStore((s) => s.selectedDirectoryPath)
+  const scanResult = useScanStore(s => s.scanResult);
+  const selectedPath = useScanStore(s => s.selectedDirectoryPath);
 
   const dir = useMemo(() => {
-    return scanResult?.directories.find((d) => d.path === selectedPath)
-  }, [scanResult, selectedPath])
+    return scanResult?.directories.find(d => d.path === selectedPath);
+  }, [scanResult, selectedPath]);
 
-  const totalSize = scanResult?.statistics?.totalSizeBytes ?? 0
+  const totalSize = scanResult?.statistics.totalSizeBytes ?? 0;
 
   if (!dir) {
     return (
       <div className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
         <h3 className="mb-2 text-sm font-semibold">Directory Detail</h3>
-        <p className="text-sm text-slate-500 dark:text-slate-400">Select a directory from the table</p>
+        <p className="text-sm text-slate-500 dark:text-slate-400">
+          Select a directory from the table
+        </p>
       </div>
-    )
+    );
   }
 
-  const pct = totalSize > 0 ? ((dir.sizeBytes / totalSize) * 100).toFixed(2) : '0.00'
+  const pct = totalSize > 0 ? ((dir.sizeBytes / totalSize) * 100).toFixed(2) : '0.00';
 
   const openInFinder = (): void => {
-    void window.electronAPI.showSaveDialog({})
-  }
+    void window.electronAPI.showSaveDialog({});
+  };
 
   return (
     <div className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
@@ -58,5 +60,5 @@ export function DirectoryDetail(): JSX.Element {
         Show in Finder / Explorer
       </button>
     </div>
-  )
+  );
 }

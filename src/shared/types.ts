@@ -10,7 +10,7 @@
 /**
  * Output format for scan results export.
  */
-export type OutputFormat = 'text' | 'csv' | 'json'
+export type OutputFormat = 'text' | 'csv' | 'json';
 
 /**
  * Configuration options for a directory scan.
@@ -20,31 +20,31 @@ export type OutputFormat = 'text' | 'csv' | 'json'
  */
 export interface ScanOptions {
   /** Absolute path to the root directory to scan. */
-  targetPath: string
+  targetPath: string;
 
   /** Whether to include hidden directories. Default true. */
-  includeHidden: boolean
+  includeHidden: boolean;
 
   /** Minimum size threshold in bytes for a directory to be included. */
-  minSizeBytes: number
+  minSizeBytes: number;
 
   /** Default output file name used when exporting. */
-  outputFile: string
+  outputFile: string;
 
   /** Maximum number of top directories to display. */
-  topCount: number
+  topCount: number;
 
   /** Export format. */
-  outputFormat: OutputFormat
+  outputFormat: OutputFormat;
 
   /** Whether to log progress details. */
-  verbose: boolean
+  verbose: boolean;
 
   /** Path to the error log file. */
-  errorLogFile: string
+  errorLogFile: string;
 
   /** Optional set of extensions to filter by (e.g. [".jpg", ".png"]). */
-  extensionFilter: string[] | null
+  extensionFilter: string[] | null;
 }
 
 /**
@@ -55,19 +55,19 @@ export interface ScanOptions {
  */
 export interface DirectoryInfo {
   /** Absolute path to the directory. */
-  path: string
+  path: string;
 
   /** Total size of direct files in bytes. */
-  sizeBytes: number
+  sizeBytes: number;
 
   /** Number of direct files. */
-  fileCount: number
+  fileCount: number;
 
   /** Unix timestamp (ms) when the directory was scanned. */
-  lastScanned: number
+  lastScanned: number;
 
   /** Error message if scanning failed, otherwise null. */
-  errorMessage: string | null
+  errorMessage: string | null;
 }
 
 /**
@@ -75,19 +75,19 @@ export interface DirectoryInfo {
  */
 export interface FileInfo {
   /** Absolute path to the file. */
-  path: string
+  path: string;
 
   /** File size in bytes. */
-  sizeBytes: number
+  sizeBytes: number;
 
   /** Normalized extension (lowercase, with leading dot). */
-  extension: string
+  extension: string;
 
   /** Content category (e.g. "images", "videos"). */
-  category: string
+  category: string;
 
   /** MIME type if available. */
-  mimeType: string | null
+  mimeType: string | null;
 }
 
 /**
@@ -95,22 +95,22 @@ export interface FileInfo {
  */
 export interface ScanStatistics {
   /** Total number of directories processed. */
-  totalDirectories: number
+  totalDirectories: number;
 
   /** Total number of files found. */
-  totalFiles: number
+  totalFiles: number;
 
   /** Total size of all files in bytes. */
-  totalSizeBytes: number
+  totalSizeBytes: number;
 
   /** Scan duration in seconds. */
-  scanDuration: number
+  scanDuration: number;
 
   /** Mapping category -> total size in bytes. */
-  categoryBreakdown: Record<string, number>
+  categoryBreakdown: Record<string, number>;
 
   /** Mapping category -> file count. */
-  fileCountByCategory: Record<string, number>
+  fileCountByCategory: Record<string, number>;
 }
 
 /**
@@ -118,22 +118,22 @@ export interface ScanStatistics {
  */
 export interface ScanResult {
   /** All scanned directories sorted by size descending. */
-  directories: readonly DirectoryInfo[]
+  directories: readonly DirectoryInfo[];
 
   /** Total number of directories scanned. */
-  totalScanned: number
+  totalScanned: number;
 
   /** Number of directories that could not be accessed. */
-  errorCount: number
+  errorCount: number;
 
   /** Scan duration in seconds. */
-  scanDuration: number
+  scanDuration: number;
 
   /** Options used for this scan. */
-  scanOptions: ScanOptions
+  scanOptions: ScanOptions;
 
   /** Aggregated statistics. */
-  statistics: ScanStatistics
+  statistics: ScanStatistics;
 }
 
 /**
@@ -141,13 +141,13 @@ export interface ScanResult {
  */
 export interface ScanProgressUpdate {
   /** Number of directories processed so far. */
-  current: number
+  current: number;
 
   /** Total number of directories discovered (may be 0 if unknown). */
-  total: number
+  total: number;
 
   /** Path currently being scanned (when verbose). */
-  currentPath: string
+  currentPath: string;
 }
 
 /**
@@ -155,14 +155,14 @@ export interface ScanProgressUpdate {
  */
 export interface EnhancedDirectoryInfo extends DirectoryInfo {
   /** Files that live directly in this directory. */
-  files: readonly FileInfo[]
+  files: readonly FileInfo[];
 
   /** Category -> size breakdown for this directory. */
-  categoryBreakdown: Record<string, number>
+  categoryBreakdown: Record<string, number>;
 
   /** Dominant category by size. */
-  dominantCategory: string
+  dominantCategory: string;
 
   /** Percentage of total scan size. */
-  percentageOfTotal: number
+  percentageOfTotal: number;
 }

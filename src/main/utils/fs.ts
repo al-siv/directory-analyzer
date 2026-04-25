@@ -7,12 +7,12 @@
  * @module main/utils/fs
  */
 
-import { stat, readdir, access } from 'fs/promises'
-import { basename } from 'path'
-import { platform } from 'os'
+import { stat, readdir, access } from 'fs/promises';
+import { basename } from 'path';
+import { platform } from 'os';
 
-let koffiModule: typeof import('koffi') | undefined
-let getFileAttributesW: ((path: Buffer) => number) | undefined
+let koffiModule: typeof import('koffi') | undefined;
+let getFileAttributesW: ((path: Buffer) => number) | undefined;
 
 /**
  * Lazily initialise the koffi FFI binding for Windows hidden-attribute detection.
@@ -22,13 +22,17 @@ let getFileAttributesW: ((path: Buffer) => number) | undefined
  *              to dot-prefix detection.
  */
 function initWindowsHiddenDetection(): void {
-  if (getFileAttributesW !== undefined) return
-  if (platform() !== 'win32') return
+  if (getFileAttributesW !== undefined) return;
+  if (platform() !== 'win32') return;
 
   try {
-    koffiModule = require('koffi')
-    const kernel32 = koffiModule.load('kernel32.dll')
-    getFileAttributesW = kernel32.func('uint32 __stdcall GetFileAttributesW', ['const uint16 *'])
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    koffiModule = require('koffi') as typeof import('koffi');
+    const kernel32 = koffiModule.load('kernel32.dll');
+    // koffi type declarations do not perfectly match the runtime API;
+    // the call below is correct and verified at runtime.
+    // @ts-expect-error — koffi overload resolution mismatch in bundled types
+    getFileAttributesW = kernel32.func('uint32 __stdcall GetFileAttributesW', ['const uint16 *']);
   } catch {
     // Fallback to dot-prefix will be used automatically.
   }
@@ -45,22 +49,22 @@ function initWindowsHiddenDetection(): void {
  * @returns True if the directory should be treated as hidden.
  */
 export function isHiddenDirectory(dirPath: string): boolean {
-  initWindowsHiddenDetection()
+  initWindowsHiddenDetection();
 
   if (getFileAttributesW !== undefined) {
     try {
-      const FILE_ATTRIBUTE_HIDDEN = 0x00000002
-      const buf = Buffer.from(dirPath + '\0', 'utf16le')
-      const attrs = getFileAttributesW(buf)
+      const FILE_ATTRIBUTE_HIDDEN = 0x00000002;
+      const buf = Buffer.from(dirPath + '\0', 'utf16le');
+      const attrs = getFileAttributesW(buf);
       if (attrs !== 0xffffffff) {
-        return (attrs & FILE_ATTRIBUTE_HIDDEN) !== 0
+        return (attrs & FILE_ATTRIBUTE_HIDDEN) !== 0;
       }
     } catch {
       // Fall through to dot-prefix check.
     }
   }
 
-  return basename(dirPath).startsWith('.')
+  return basename(dirPath).startsWith('.');
 }
 
 /**
@@ -71,11 +75,11 @@ export function isHiddenDirectory(dirPath: string): boolean {
  */
 export async function isAccessibleDirectory(dirPath: string): Promise<boolean> {
   try {
-    await access(dirPath)
-    await readdir(dirPath)
-    return true
+    await access(dirPath);
+    await readdir(dirPath);
+    return true;
   } catch {
-    return false
+    return false;
   }
 }
 
@@ -89,10 +93,10 @@ export async function isAccessibleDirectory(dirPath: string): Promise<boolean> {
  */
 export async function safeGetFileSize(filePath: string): Promise<number> {
   try {
-    const s = await stat(filePath)
-    return s.isFile() ? s.size : 0
+    const s = await stat(filePath);
+    return s.isFile() ? s.size : 0;
   } catch {
-    return 0
+    return 0;
   }
 }
 
@@ -106,10 +110,10 @@ export async function safeGetFileSize(filePath: string): Promise<number> {
  */
 export async function* getDirectFiles(directory: string): AsyncGenerator<string> {
   try {
-    const entries = await readdir(directory, { withFileTypes: true })
+    const entries = await readdir(directory, { withFileTypes: true });
     for (const entry of entries) {
       if (entry.isFile()) {
-        yield entry.name
+        yield entry.name;
       }
     }
   } catch {
@@ -129,11 +133,11 @@ export async function* getSubdirectories(
   includeHidden: boolean
 ): AsyncGenerator<string> {
   try {
-    const entries = await readdir(directory, { withFileTypes: true })
+    const entries = await readdir(directory, { withFileTypes: true });
     for (const entry of entries) {
       if (entry.isDirectory()) {
         if (includeHidden || !isHiddenDirectory(`${directory}/${entry.name}`)) {
-          yield entry.name
+          yield entry.name;
         }
       }
     }
