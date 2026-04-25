@@ -73,6 +73,7 @@
   "build": {
     "appId": "com.sivolobov.directory-analyzer",
     "productName": "Directory Analyzer",
+    "npmRebuild": false,
     "directories": {
       "output": "dist"
     },

@@ -32,7 +32,7 @@ export default function App() {
         <div className="flex items-center gap-3">
           <HardDrive
             className="h-6 w-6 text-blue-600 dark:text-blue-400"
-            style={{ ['WebkitAppRegion' as string]: 'no-drag' }}
+            style={{ WebkitAppRegion: 'no-drag' }}
           />
           <h1 className="text-lg font-semibold">Directory Analyzer</h1>
           <span className="rounded bg-slate-200 px-2 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-400">
