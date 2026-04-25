@@ -17,17 +17,12 @@ export interface ElectronAPI {
   ) => Promise<{ success: boolean; result?: ScanResult; error?: string }>;
   scanCancel: () => void;
   onScanProgress: (callback: (update: ScanProgressUpdate) => void) => () => void;
-  onScanComplete: (callback: (result: ScanResult) => void) => () => void;
-  onScanError: (callback: (error: string) => void) => () => void;
   exportResults: (
     result: ScanResult,
     format: OutputFormat
   ) => Promise<{ success: boolean; filePath?: string; error?: string }>;
   showOpenDirectoryDialog: () => Promise<{ success: boolean; path?: string }>;
-  showSaveDialog: (options: {
-    defaultPath?: string;
-    filters?: Electron.FileFilter[];
-  }) => Promise<{ success: boolean; filePath?: string }>;
+  openPath: (dirPath: string) => Promise<{ success: boolean; error?: string }>;
   getPlatform: () => string;
 }
 
@@ -39,27 +34,13 @@ const api: ElectronAPI = {
   },
 
   onScanProgress: (callback): (() => void) => {
-    const listener = (_event: Electron.IpcRendererEvent, update: ScanProgressUpdate): void =>
-      { callback(update); };
+    const listener = (_event: Electron.IpcRendererEvent, update: ScanProgressUpdate): void => {
+      callback(update);
+    };
     ipcRenderer.on(IPC_CHANNELS.SCAN_PROGRESS, listener);
     return (): void => {
       ipcRenderer.removeListener(IPC_CHANNELS.SCAN_PROGRESS, listener);
     };
-  },
-
-  onScanComplete: (callback): (() => void) => {
-    const listener = (_event: Electron.IpcRendererEvent, result: ScanResult): void =>
-      { callback(result); };
-    ipcRenderer.on(IPC_CHANNELS.SCAN_COMPLETE, listener);
-    return (): void => {
-      ipcRenderer.removeListener(IPC_CHANNELS.SCAN_COMPLETE, listener);
-    };
-  },
-
-  onScanError: (callback): (() => void) => {
-    const listener = (_event: Electron.IpcRendererEvent, error: string): void => { callback(error); };
-    ipcRenderer.on(IPC_CHANNELS.SCAN_ERROR, listener);
-    return () => ipcRenderer.removeListener(IPC_CHANNELS.SCAN_ERROR, listener);
   },
 
   exportResults: async (result, format) =>
@@ -67,7 +48,7 @@ const api: ElectronAPI = {
 
   showOpenDirectoryDialog: async () => ipcRenderer.invoke(IPC_CHANNELS.SHOW_OPEN_DIALOG),
 
-  showSaveDialog: async options => ipcRenderer.invoke(IPC_CHANNELS.SHOW_SAVE_DIALOG, options),
+  openPath: async dirPath => ipcRenderer.invoke(IPC_CHANNELS.OPEN_PATH, dirPath),
 
   getPlatform: (): string => process.platform,
 };

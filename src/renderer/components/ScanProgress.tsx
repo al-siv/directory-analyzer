@@ -1,9 +1,8 @@
 import { useScanStore } from '@renderer/store/scanStore';
-import { Loader2, FolderSearch } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 export function ScanProgress(): JSX.Element {
   const progress = useScanStore(s => s.progress);
-  const scanResult = useScanStore(s => s.scanResult);
 
   const current = progress?.current ?? 0;
   const total = progress?.total ?? 0;
@@ -28,13 +27,6 @@ export function ScanProgress(): JSX.Element {
           />
         </div>
       </div>
-
-      {scanResult && (
-        <p className="text-sm text-slate-500 dark:text-slate-400">
-          <FolderSearch className="mr-1 inline h-4 w-4" />
-          {scanResult.totalScanned.toLocaleString()} directories found so far
-        </p>
-      )}
     </div>
   );
 }

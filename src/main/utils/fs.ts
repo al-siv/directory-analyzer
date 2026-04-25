@@ -7,8 +7,8 @@
  * @module main/utils/fs
  */
 
-import { stat, readdir, access } from 'fs/promises';
-import { basename } from 'path';
+import { stat, readdir } from 'fs/promises';
+import { basename, join } from 'path';
 import { platform } from 'os';
 
 let koffiModule: typeof import('koffi') | undefined;
@@ -75,7 +75,6 @@ export function isHiddenDirectory(dirPath: string): boolean {
  */
 export async function isAccessibleDirectory(dirPath: string): Promise<boolean> {
   try {
-    await access(dirPath);
     await readdir(dirPath);
     return true;
   } catch {
@@ -136,7 +135,7 @@ export async function* getSubdirectories(
     const entries = await readdir(directory, { withFileTypes: true });
     for (const entry of entries) {
       if (entry.isDirectory()) {
-        if (includeHidden || !isHiddenDirectory(`${directory}/${entry.name}`)) {
+        if (includeHidden || !isHiddenDirectory(join(directory, entry.name))) {
           yield entry.name;
         }
       }

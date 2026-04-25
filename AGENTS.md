@@ -166,7 +166,7 @@ directory-analyzer/
 │   │   ├── ipc/
 │   │   │   └── handlers.ts   # IPC handler registration + input validation
 │   │   ├── core/
-│   │   │   ├── scanner.ts    # Directory scanning (Worker Threads)
+│  │   │   ├── scanner.ts    # Directory scanning (Async Task Pool)
 │   │   │   ├── classifier.ts # File classification engine
 │   │   │   └── exporter.ts   # CSV/JSON/TXT export generation
 │   │   ├── utils/
@@ -174,7 +174,7 @@ directory-analyzer/
 │   │   │   ├── format.ts     # bytesToHumanReadable, formatPercentage
 │   │   │   └── progress.ts   # Progress reporting for scans
 │   │   └── workers/
-│   │       └── scan.worker.ts # Worker thread for parallel scanning
+
 │   │
 │   ├── preload/              # Preload script (isolated context)
 │   │   └── index.ts          # Expose safe API via contextBridge
@@ -194,8 +194,7 @@ directory-analyzer/
 │       │   ├── ErrorAlert.tsx
 │       │   └── ThemeToggle.tsx
 │       ├── hooks/
-│       │   ├── useScan.ts
-│       │   └── useIpc.ts
+│       │   └── useScan.ts
 │       └── store/
 │           └── scanStore.ts
 └── tests/
@@ -217,8 +216,8 @@ directory-analyzer/
 
 ## 5. Key Design Decisions
 
-### 5.1 Worker Threads for Scanning
-The Python version uses `ThreadPoolExecutor`. In Node.js, use `worker_threads` to offload filesystem scanning from the main process and avoid blocking the UI. Use `fs/promises` for async I/O.
+### 5.1 Async Task Pool for Scanning
+The Python version uses `ThreadPoolExecutor`. In Node.js, filesystem scanning is I/O-bound, so `fs/promises` with an async task pool (limited concurrency via `Promise.race`) is sufficient to keep the UI responsive without the overhead of `worker_threads`. The async task pool is implemented directly in `scanner.ts`.
 
 ### 5.2 IPC Communication Pattern
 Typed IPC layer with **zero abstraction libraries** (full control, easier to debug, no hidden magic):
@@ -369,9 +368,8 @@ export function bytesToHumanReadable(sizeBytes: number): string {
 ### Phase 3: IPC Layer
 1. Define all IPC channels and payloads in `src/shared/ipc-channels.ts`
 2. Implement main process handlers with input validation
-3. Implement renderer-side `useIpc` hook
-4. Implement `useScan` hook with start/cancel/progress/completion
-5. Test IPC round-trip
+3. Implement `useScan` hook with start/cancel/progress/completion
+4. Test IPC round-trip
 
 ### Phase 4: UI Implementation
 1. Build `ScanConfigForm` (path picker, filters, options)
@@ -429,7 +427,7 @@ export function bytesToHumanReadable(sizeBytes: number): string {
 
 1. **Feature parity**: All Python CLI features available in GUI (scan, filter, classify, export text/csv/json)
 2. **Performance**: Within 2x of Python scan speed (Electron/Node.js overhead acceptable)
-3. **Responsiveness**: UI never freezes during scan (Worker Threads + IPC)
+3. **Responsiveness**: UI never freezes during scan (Async Task Pool + IPC)
 4. **Cross-platform**: Builds and runs on Windows, macOS, Linux
 5. **Type safety**: No `any` types in core logic, strict TypeScript throughout
 6. **Security**: Passes `eslint-plugin-security` audit, no path traversal vulnerabilities

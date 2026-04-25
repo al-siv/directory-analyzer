@@ -1,5 +1,6 @@
 import { useScanStore } from '@renderer/store/scanStore';
 import { Folder, FileText, HardDrive, Clock, AlertTriangle } from 'lucide-react';
+import { bytesToHumanReadable } from '@shared/utils/format';
 
 function Card({
   icon,
@@ -29,18 +30,6 @@ export function SummaryCards(): JSX.Element {
 
   if (!stats) return <></>;
 
-  const formatSize = (bytes: number): string => {
-    if (bytes === 0) return '0 B';
-    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-    let size = bytes;
-    let i = 0;
-    while (size >= 1024 && i < units.length - 1) {
-      size /= 1024;
-      i++;
-    }
-    return i === 0 ? `${String(size)} B` : `${size.toFixed(1)} ${units[i]}`;
-  };
-
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
       <Card
@@ -58,7 +47,7 @@ export function SummaryCards(): JSX.Element {
       <Card
         icon={<HardDrive className="h-5 w-5 text-violet-600 dark:text-violet-400" />}
         label="Total Size"
-        value={formatSize(stats.totalSizeBytes)}
+        value={bytesToHumanReadable(stats.totalSizeBytes)}
         colorClass="bg-violet-50 dark:bg-violet-900/30"
       />
       <Card

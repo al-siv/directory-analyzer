@@ -17,11 +17,8 @@ export const ScanOptionsSchema = z.object({
   targetPath: z.string().min(1),
   includeHidden: z.boolean(),
   minSizeBytes: z.number().int().min(0),
-  outputFile: z.string(),
   topCount: z.number().int().min(1).max(10000),
   outputFormat: z.enum(['text', 'csv', 'json']),
-  verbose: z.boolean(),
-  errorLogFile: z.string(),
   extensionFilter: z.array(z.string().min(1)).nullable(),
 });
 

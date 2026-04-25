@@ -11,11 +11,8 @@ function makeScanResult(format: ScanOptions['outputFormat']): ScanResult {
     targetPath: '/test',
     includeHidden: true,
     minSizeBytes: 0,
-    outputFile: 'out.txt',
     topCount: 10,
     outputFormat: format,
-    verbose: false,
-    errorLogFile: 'err.txt',
     extensionFilter: null,
   };
 

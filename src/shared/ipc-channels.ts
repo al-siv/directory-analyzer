@@ -28,8 +28,8 @@ export const IPC_CHANNELS = {
   /** Renderer -> Main: show native open-directory dialog. */
   SHOW_OPEN_DIALOG: 'dialog:open-directory',
 
-  /** Renderer -> Main: show native save-file dialog. */
-  SHOW_SAVE_DIALOG: 'dialog:save-file',
+  /** Renderer -> Main: open path in system file manager. */
+  OPEN_PATH: 'shell:open-path',
 } as const;
 
 /** Union type of all channel names. */

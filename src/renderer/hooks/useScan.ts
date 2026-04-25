@@ -17,24 +17,8 @@ export function useScan(): {
       useScanStore.getState().setProgress(update);
     });
 
-    const unsubComplete = window.electronAPI.onScanComplete(result => {
-      const s = useScanStore.getState();
-      s.setScanResult(result);
-      s.setAppState('results');
-      s.setProgress(null);
-    });
-
-    const unsubError = window.electronAPI.onScanError(error => {
-      const s = useScanStore.getState();
-      s.setError(error);
-      s.setAppState('error');
-      s.setProgress(null);
-    });
-
     return (): void => {
       unsubProgress();
-      unsubComplete();
-      unsubError();
     };
   }, []);
 
@@ -54,11 +38,8 @@ export function useScan(): {
       targetPath: s.targetPath,
       includeHidden: s.includeHidden,
       minSizeBytes: s.minSizeMb * 1024 * 1024,
-      outputFile: 'largest_directories.txt',
       topCount: s.topCount,
       outputFormat: 'text',
-      verbose: s.verbose,
-      errorLogFile: 'no-access.txt',
       extensionFilter: extFilter.length > 0 ? extFilter : null,
     };
 

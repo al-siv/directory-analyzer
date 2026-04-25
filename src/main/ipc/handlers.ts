@@ -7,7 +7,7 @@
  * @module main/ipc/handlers
  */
 
-import { ipcMain, dialog, BrowserWindow } from 'electron';
+import { ipcMain, dialog, BrowserWindow, shell } from 'electron';
 import { IPC_CHANNELS } from '@shared/ipc-channels';
 import type { ScanOptions, ScanResult, OutputFormat } from '@shared/types';
 import { ScanOptionsSchema } from '@shared/schemas';
@@ -100,22 +100,13 @@ export function registerIpcHandlers(): void {
     return { success: true, path: filePaths[0] };
   });
 
-  ipcMain.handle(
-    IPC_CHANNELS.SHOW_SAVE_DIALOG,
-    async (_event, options: { defaultPath?: string; filters?: Electron.FileFilter[] }) => {
-      const win = BrowserWindow.getFocusedWindow();
-      if (!win) {
-        return { success: false, filePath: undefined };
-      }
-
-      const { filePath } = await dialog.showSaveDialog(win, {
-        defaultPath: options.defaultPath,
-        filters: options.filters,
-      });
-
-      return { success: !!filePath, filePath };
+  ipcMain.handle(IPC_CHANNELS.OPEN_PATH, async (_event, dirPath: string) => {
+    if (typeof dirPath !== 'string' || dirPath.length === 0) {
+      return { success: false, error: 'Invalid path' };
     }
-  );
+    const error = await shell.openPath(dirPath);
+    return { success: error === '', error: error || undefined };
+  });
 }
 
 /**
@@ -139,8 +130,6 @@ function validateScanOptions(options: unknown): ScanOptions {
   return {
     ...parsed,
     targetPath,
-    outputFile: resolve(normalize(parsed.outputFile)),
-    errorLogFile: resolve(normalize(parsed.errorLogFile)),
     minSizeBytes: Math.max(0, Math.floor(parsed.minSizeBytes)),
     topCount: Math.max(1, Math.floor(parsed.topCount)),
     extensionFilter:

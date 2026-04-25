@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["src/main/**/*", "src/shared/**/*", "tests/**/*"],
+  "exclude": ["src/renderer/**/*", "src/preload/**/*", "node_modules", "out", "dist"],
+  "compilerOptions": {
+    "composite": true,
+    "jsx": "preserve",
+    "lib": ["ES2020"],
+    "baseUrl": ".",
+    "paths": {
+      "@main/*": ["src/main/*"],
+      "@shared/*": ["src/shared/*"]
+    }
+  }
+}

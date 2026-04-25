@@ -22,6 +22,9 @@ function createWindow(): BrowserWindow {
     titleBarStyle: process.platform === 'darwin' ? 'hidden' : 'default',
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
+      // Sandbox is disabled to allow the preload script to load native FFI
+      // modules (koffi) required for Windows hidden-directory detection.
+      // contextIsolation and nodeIntegration:false still provide strong isolation.
       sandbox: false,
       contextIsolation: true,
       nodeIntegration: false,

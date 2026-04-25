@@ -8,6 +8,7 @@
  */
 
 import { join } from 'path';
+import { realpath } from 'fs/promises';
 import type {
   DirectoryInfo,
   FileInfo,
@@ -92,6 +93,7 @@ export class DirectoryScanner {
       reporter.finish();
 
       results.sort((a, b) => b.sizeBytes - a.sizeBytes);
+      results = results.slice(0, this.options.topCount);
 
       const duration = (Date.now() - startTime) / 1000;
       const statistics = this.createScanStatistics(results, duration);
@@ -127,6 +129,7 @@ export class DirectoryScanner {
   private async collectAllDirectories(rootPath: string, signal: AbortSignal): Promise<string[]> {
     const dirs: string[] = [rootPath];
     const stack: string[] = [rootPath];
+    const visited = new Set<string>();
 
     while (stack.length > 0) {
       if (signal.aborted) {
@@ -140,6 +143,15 @@ export class DirectoryScanner {
         const subdirs = await getSubdirectoryPaths(current, this.options.includeHidden);
         for (const sub of subdirs) {
           const full = join(current, sub);
+          try {
+            const realFull = await realpath(full);
+            if (visited.has(realFull)) {
+              continue;
+            }
+            visited.add(realFull);
+          } catch {
+            // If realpath fails, fall back to the raw path and continue.
+          }
           dirs.push(full);
           stack.push(full);
         }

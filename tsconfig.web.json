@@ -1,0 +1,20 @@
+{
+  "extends": "@electron-toolkit/tsconfig/tsconfig.web.json",
+  "include": [
+    "src/renderer/**/*",
+    "src/preload/**/*",
+    "src/shared/**/*"
+  ],
+  "exclude": ["src/main/**/*"],
+  "compilerOptions": {
+    "composite": true,
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@renderer/*": ["src/renderer/*"],
+      "@shared/*": ["src/shared/*"]
+    },
+    "noFallthroughCasesInSwitch": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"]
+  }
+}

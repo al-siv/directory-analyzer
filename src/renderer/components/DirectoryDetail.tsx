@@ -26,7 +26,7 @@ export function DirectoryDetail(): JSX.Element {
   const pct = totalSize > 0 ? ((dir.sizeBytes / totalSize) * 100).toFixed(2) : '0.00';
 
   const openInFinder = (): void => {
-    void window.electronAPI.showSaveDialog({});
+    void window.electronAPI.openPath(dir.path);
   };
 
   return (

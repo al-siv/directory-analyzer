@@ -28,20 +28,11 @@ export interface ScanOptions {
   /** Minimum size threshold in bytes for a directory to be included. */
   minSizeBytes: number;
 
-  /** Default output file name used when exporting. */
-  outputFile: string;
-
   /** Maximum number of top directories to display. */
   topCount: number;
 
   /** Export format. */
   outputFormat: OutputFormat;
-
-  /** Whether to log progress details. */
-  verbose: boolean;
-
-  /** Path to the error log file. */
-  errorLogFile: string;
 
   /** Optional set of extensions to filter by (e.g. [".jpg", ".png"]). */
   extensionFilter: string[] | null;
@@ -148,21 +139,4 @@ export interface ScanProgressUpdate {
 
   /** Path currently being scanned (when verbose). */
   currentPath: string;
-}
-
-/**
- * Extended directory information with per-directory classification details.
- */
-export interface EnhancedDirectoryInfo extends DirectoryInfo {
-  /** Files that live directly in this directory. */
-  files: readonly FileInfo[];
-
-  /** Category -> size breakdown for this directory. */
-  categoryBreakdown: Record<string, number>;
-
-  /** Dominant category by size. */
-  dominantCategory: string;
-
-  /** Percentage of total scan size. */
-  percentageOfTotal: number;
 }

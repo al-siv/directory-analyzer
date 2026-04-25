@@ -11,11 +11,8 @@ describe('Python parity regression', () => {
       targetPath: fixture,
       includeHidden: true,
       minSizeBytes: 0,
-      outputFile: 'out.txt',
       topCount: 50,
       outputFormat: 'json',
-      verbose: false,
-      errorLogFile: 'err.txt',
       extensionFilter: null,
     };
 

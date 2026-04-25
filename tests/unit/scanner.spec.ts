@@ -31,11 +31,8 @@ function makeOptions(overrides?: Partial<ScanOptions>): ScanOptions {
     targetPath: TMP_DIR,
     includeHidden: true,
     minSizeBytes: 0,
-    outputFile: 'results.txt',
     topCount: 50,
     outputFormat: 'text',
-    verbose: false,
-    errorLogFile: 'no-access.txt',
     extensionFilter: null,
     ...overrides,
   };

@@ -7,6 +7,8 @@
  * @module main/utils/progress
  */
 
+import { PROGRESS_PERCENTAGE_INTERVAL, PROGRESS_UPDATE_FREQUENCY } from '@shared/constants';
+
 export interface ProgressCallback {
   (current: number, total: number): void;
 }
@@ -41,11 +43,11 @@ export class ProgressReporter {
 
     if (this.total !== null && this.total > 0) {
       const percent = Math.floor((this.current / this.total) * 100);
-      if (percent > this.lastReported && percent % 5 === 0) {
+      if (percent - this.lastReported >= PROGRESS_PERCENTAGE_INTERVAL) {
         this.lastReported = percent;
         this.onUpdate?.(this.current, this.total);
       }
-    } else if (this.current % 1000 === 0) {
+    } else if (this.current % PROGRESS_UPDATE_FREQUENCY === 0) {
       this.onUpdate?.(this.current, 0);
     }
   }

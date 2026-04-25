@@ -170,6 +170,8 @@ function createCategoryMap(): Map<string, ReadonlySet<string>> {
       '.numbers',
       '.key',
       '.tex',
+      '.csv',
+      '.tsv',
     ])
   );
 

@@ -1,6 +1,7 @@
 import { useScanStore } from '@renderer/store/scanStore';
 import { useMemo, useState } from 'react';
 import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { bytesToHumanReadable, formatPercentage } from '@shared/utils/format';
 
 type SortKey = 'path' | 'sizeBytes' | 'percentage' | 'fileCount';
 type SortDir = 'asc' | 'desc';
@@ -61,24 +62,10 @@ export function ResultsTable(): JSX.Element {
     );
   };
 
-  const formatSize = (bytes: number): string => {
-    if (bytes === 0) return '0 B';
-    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-    let size = bytes;
-    let unitIdx = 0;
-    while (size >= 1024 && unitIdx < units.length - 1) {
-      size /= 1024;
-      unitIdx++;
-    }
-    return unitIdx === 0 ? `${String(size)} B` : `${size.toFixed(1)} ${units[unitIdx]}`;
-  };
-
   const formatPct = (bytes: number): string => {
     const total = scanResult?.statistics.totalSizeBytes ?? 0;
-    if (total === 0) return '0.00%';
-    const pct = (bytes / total) * 100;
-    if (pct < 0.01) return '<0.01%';
-    return `${pct.toFixed(2)}%`;
+    if (total === 0) return formatPercentage(0);
+    return formatPercentage((bytes / total) * 100);
   };
 
   return (
@@ -88,7 +75,9 @@ export function ResultsTable(): JSX.Element {
           type="text"
           placeholder="Filter by path..."
           value={filterText}
-          onChange={e => { setFilterText(e.target.value); }}
+          onChange={e => {
+            setFilterText(e.target.value);
+          }}
           className="w-full rounded border border-slate-300 px-3 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-800"
         />
       </div>
@@ -100,25 +89,33 @@ export function ResultsTable(): JSX.Element {
               <th className="px-4 py-2 font-medium">#</th>
               <th
                 className="cursor-pointer px-4 py-2 font-medium hover:text-slate-700 dark:hover:text-slate-200"
-                onClick={() => { toggleSort('path'); }}
+                onClick={() => {
+                  toggleSort('path');
+                }}
               >
                 Directory <SortIcon col="path" />
               </th>
               <th
                 className="cursor-pointer px-4 py-2 font-medium hover:text-slate-700 dark:hover:text-slate-200"
-                onClick={() => { toggleSort('sizeBytes'); }}
+                onClick={() => {
+                  toggleSort('sizeBytes');
+                }}
               >
                 Size <SortIcon col="sizeBytes" />
               </th>
               <th
                 className="cursor-pointer px-4 py-2 font-medium hover:text-slate-700 dark:hover:text-slate-200"
-                onClick={() => { toggleSort('percentage'); }}
+                onClick={() => {
+                  toggleSort('percentage');
+                }}
               >
                 % <SortIcon col="percentage" />
               </th>
               <th
                 className="cursor-pointer px-4 py-2 font-medium hover:text-slate-700 dark:hover:text-slate-200"
-                onClick={() => { toggleSort('fileCount'); }}
+                onClick={() => {
+                  toggleSort('fileCount');
+                }}
               >
                 Files <SortIcon col="fileCount" />
               </th>
@@ -130,7 +127,9 @@ export function ResultsTable(): JSX.Element {
               return (
                 <tr
                   key={dir.path}
-                  onClick={() => { setSelected(dir.path); }}
+                  onClick={() => {
+                    setSelected(dir.path);
+                  }}
                   className={`cursor-pointer transition-colors ${
                     isSelected
                       ? 'bg-blue-50 dark:bg-blue-900/20'
@@ -141,7 +140,7 @@ export function ResultsTable(): JSX.Element {
                   <td className="max-w-xs truncate px-4 py-2 font-mono text-xs" title={dir.path}>
                     {dir.path}
                   </td>
-                  <td className="px-4 py-2 font-medium">{formatSize(dir.sizeBytes)}</td>
+                  <td className="px-4 py-2 font-medium">{bytesToHumanReadable(dir.sizeBytes)}</td>
                   <td className="px-4 py-2 text-slate-500 dark:text-slate-400">
                     {formatPct(dir.sizeBytes)}
                   </td>
