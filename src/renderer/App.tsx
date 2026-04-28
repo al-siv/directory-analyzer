@@ -149,10 +149,12 @@ export default function App() {
                     <div className="mb-4 flex items-center justify-between">
                       <h3 className="text-sm font-semibold">Directory Detail</h3>
                       <button
+                        type="button"
                         onClick={() => {
                           setSelectedDirectoryPath(null);
                         }}
                         className="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                        aria-label="Close directory detail"
                       >
                         <X className="h-4 w-4" />
                       </button>

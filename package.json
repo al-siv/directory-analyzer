@@ -10,6 +10,9 @@
     "dev": "electron-vite dev",
     "build": "pnpm run typecheck && electron-vite build",
     "preview": "electron-vite preview",
+    "verify": "pnpm run clean && pnpm run lint && pnpm run typecheck && pnpm test && pnpm run build",
+    "verify:full": "pnpm run verify && pnpm run test:coverage && pnpm exec playwright test",
+    "clean": "node scripts/clean-generated.js",
     "typecheck": "tsc --build",
     "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint . --fix",
@@ -59,6 +62,7 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
+    "electron-log": "^5.4.3",
     "koffi": "^2.16.0",
     "lucide-react": "^1.11.0",
     "react": "^19.0.0",

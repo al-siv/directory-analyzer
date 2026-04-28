@@ -13,6 +13,7 @@ import { useScanStore } from '@renderer/store/scanStore';
 import { useMemo, useState } from 'react';
 import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { bytesToHumanReadable, formatPercentage } from '@shared/utils/format';
+import { RESULTS_TABLE_PAGE_SIZE } from '@shared/constants';
 
 const CATEGORY_COLORS: Record<string, string> = {
   images: 'bg-violet-100 text-violet-700 dark:bg-violet-900 dark:text-violet-300',
@@ -53,6 +54,7 @@ export function ResultsTable(): JSX.Element {
   const [sortKey, setSortKey] = useState<SortKey>('sizeBytes');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
   const [filterText, setFilterText] = useState('');
+  const [page, setPage] = useState(1);
 
   const sorted = useMemo(() => {
     const directories = scanResult?.directories ?? [];
@@ -87,6 +89,13 @@ export function ResultsTable(): JSX.Element {
     return list;
   }, [scanResult, sortKey, sortDir, filterText]);
 
+  const totalPages = Math.max(1, Math.ceil(sorted.length / RESULTS_TABLE_PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const visibleRows = sorted.slice(
+    (currentPage - 1) * RESULTS_TABLE_PAGE_SIZE,
+    currentPage * RESULTS_TABLE_PAGE_SIZE
+  );
+
   const toggleSort = (key: SortKey): void => {
     if (sortKey === key) {
       setSortDir(d => (d === 'asc' ? 'desc' : 'asc'));
@@ -94,6 +103,7 @@ export function ResultsTable(): JSX.Element {
       setSortKey(key);
       setSortDir('desc');
     }
+    setPage(1);
   };
 
   const formatPct = (bytes: number): string => {
@@ -111,6 +121,7 @@ export function ResultsTable(): JSX.Element {
           value={filterText}
           onChange={e => {
             setFilterText(e.target.value);
+            setPage(1);
           }}
           className="w-full rounded border border-slate-300 px-3 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-800"
         />
@@ -164,8 +175,9 @@ export function ResultsTable(): JSX.Element {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-            {sorted.map((dir, idx) => {
+            {visibleRows.map((dir, idx) => {
               const isSelected = selectedPath === dir.path;
+              const rank = (currentPage - 1) * RESULTS_TABLE_PAGE_SIZE + idx + 1;
               const catClass = dir.dominantCategory
                 ? (CATEGORY_COLORS[dir.dominantCategory] ?? CATEGORY_COLORS.other)
                 : '';
@@ -178,6 +190,17 @@ export function ResultsTable(): JSX.Element {
                   onDoubleClick={() => {
                     void window.electronAPI.openPath(dir.path);
                   }}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') {
+                      setSelected(dir.path);
+                    }
+                    if (e.key === ' ') {
+                      e.preventDefault();
+                      void window.electronAPI.openPath(dir.path);
+                    }
+                  }}
+                  tabIndex={0}
+                  aria-selected={isSelected}
                   className={`cursor-pointer transition-colors ${
                     isSelected
                       ? 'bg-blue-50 dark:bg-blue-900/20'
@@ -185,7 +208,7 @@ export function ResultsTable(): JSX.Element {
                   }`}
                   title="Double-click to open in file manager"
                 >
-                  <td className="px-4 py-2 text-slate-400">{idx + 1}</td>
+                  <td className="px-4 py-2 text-slate-400">{rank}</td>
                   <td className="max-w-xs truncate px-4 py-2 font-mono text-xs" title={dir.path}>
                     {dir.path}
                   </td>
@@ -212,6 +235,41 @@ export function ResultsTable(): JSX.Element {
           </tbody>
         </table>
       </div>
+
+      {sorted.length > RESULTS_TABLE_PAGE_SIZE && (
+        <div className="flex items-center justify-between border-t border-slate-200 px-4 py-2 text-xs text-slate-500 dark:border-slate-700 dark:text-slate-400">
+          <span>
+            Showing {(currentPage - 1) * RESULTS_TABLE_PAGE_SIZE + 1}-
+            {Math.min(currentPage * RESULTS_TABLE_PAGE_SIZE, sorted.length)} of{' '}
+            {sorted.length.toLocaleString()}
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              disabled={currentPage === 1}
+              onClick={() => {
+                setPage(p => Math.max(1, p - 1));
+              }}
+              className="rounded border border-slate-200 px-2 py-1 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700"
+            >
+              Previous
+            </button>
+            <span>
+              Page {currentPage} / {totalPages}
+            </span>
+            <button
+              type="button"
+              disabled={currentPage === totalPages}
+              onClick={() => {
+                setPage(p => Math.min(totalPages, p + 1));
+              }}
+              className="rounded border border-slate-200 px-2 py-1 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

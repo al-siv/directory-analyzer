@@ -3,6 +3,9 @@
   "include": ["electron.vite.config.*", "vitest.config.*", "playwright.config.*", "eslint.config.mjs"],
   "compilerOptions": {
     "composite": true,
+    "noEmit": true,
+    "outDir": "./.tsc-root/node",
+    "tsBuildInfoFile": "./.tsc-root/tsconfig.node.tsbuildinfo",
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,

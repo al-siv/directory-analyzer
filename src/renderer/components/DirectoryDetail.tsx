@@ -21,6 +21,7 @@ import {
   ChevronUp,
 } from 'lucide-react';
 import { bytesToHumanReadable } from '@shared/utils/format';
+import { DIRECTORY_DETAIL_FILE_LIMIT } from '@shared/constants';
 
 const CATEGORY_COLORS: Record<string, string> = {
   images: 'bg-violet-500',
@@ -33,6 +34,10 @@ const CATEGORY_COLORS: Record<string, string> = {
   system: 'bg-gray-500',
   other: 'bg-slate-400',
 };
+
+function fileNameFromPath(filePath: string): string {
+  return filePath.split(/[\\/]/).pop() ?? filePath;
+}
 
 export function DirectoryDetail(): JSX.Element {
   const scanResult = useScanStore(s => s.scanResult);
@@ -153,10 +158,10 @@ export function DirectoryDetail(): JSX.Element {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
-                  {dir.files.map(f => (
+                  {dir.files.slice(0, DIRECTORY_DETAIL_FILE_LIMIT).map(f => (
                     <tr key={f.path}>
                       <td className="max-w-[140px] truncate px-2 py-1" title={f.path}>
-                        {f.path.split('/').pop() ?? f.path}
+                        {fileNameFromPath(f.path)}
                       </td>
                       <td className="px-2 py-1 text-right text-slate-500 dark:text-slate-400">
                         {bytesToHumanReadable(f.sizeBytes)}
@@ -165,6 +170,12 @@ export function DirectoryDetail(): JSX.Element {
                   ))}
                 </tbody>
               </table>
+              {dir.files.length > DIRECTORY_DETAIL_FILE_LIMIT && (
+                <p className="px-2 py-1 text-xs text-slate-500 dark:text-slate-400">
+                  Showing first {DIRECTORY_DETAIL_FILE_LIMIT} of {dir.files.length.toLocaleString()}{' '}
+                  files.
+                </p>
+              )}
             </div>
           )}
         </div>

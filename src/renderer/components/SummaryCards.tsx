@@ -76,7 +76,11 @@ export function SummaryCards(): JSX.Element {
         icon={<AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />}
         label="Errors"
         value={result.errorCount.toLocaleString()}
-        colorClass="bg-red-50 dark:bg-red-900/30"
+        colorClass={
+          result.errorCount > 0
+            ? 'bg-red-50 dark:bg-red-900/30'
+            : 'bg-emerald-50 dark:bg-emerald-900/30'
+        }
         onClick={
           result.accessErrors.length > 0
             ? () => {

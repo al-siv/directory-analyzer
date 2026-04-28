@@ -17,6 +17,9 @@ export type OutputFormat = 'text' | 'csv' | 'json';
  *
  * @description Mirrors Python ScanOptions dataclass. All paths are strings
  *              because Pathlib does not exist in the renderer process.
+ *
+ * @see {@link validateScanOptions} in src/main/ipc/handlers.ts for runtime validation.
+ * @see {@link useScan.startScan} in src/renderer/hooks/useScan.ts for UI trigger.
  */
 export interface ScanOptions {
   /** Absolute path to the root directory to scan. */
@@ -31,8 +34,8 @@ export interface ScanOptions {
   /** Maximum number of top directories to display. */
   topCount: number;
 
-  /** Export format. */
-  outputFormat: OutputFormat;
+  /** Export format (deprecated in scan context; used only for export). */
+  outputFormat?: OutputFormat;
 
   /** Optional set of extensions to filter by (e.g. [".jpg", ".png"]). */
   extensionFilter: string[] | null;
@@ -115,6 +118,9 @@ export interface ScanStatistics {
 
 /**
  * Result of a completed scan.
+ *
+ * @see {@link exportResults} in src/main/core/exporter.ts for export consumers.
+ * @see {@link useScanStore} in src/renderer/store/scanStore.ts for UI state.
  */
 export interface ScanResult {
   /** All scanned directories sorted by size descending. */

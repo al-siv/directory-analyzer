@@ -16,13 +16,20 @@ import type { OutputFormat } from '@shared/types';
 export function ExportBar(): JSX.Element {
   const scanResult = useScanStore(s => s.scanResult);
   const [exportError, setExportError] = useState<string | null>(null);
+  const [exportSuccess, setExportSuccess] = useState<string | null>(null);
 
   const handleExport = async (format: OutputFormat): Promise<void> => {
     if (!scanResult) return;
     setExportError(null);
+    setExportSuccess(null);
     const result = await window.electronAPI.exportResults(scanResult, format);
+    if (result.cancelled) {
+      return;
+    }
     if (!result.success) {
       setExportError(result.error ?? 'Unknown error');
+    } else if (result.filePath) {
+      setExportSuccess(`Saved to ${result.filePath}`);
     }
   };
 
@@ -62,6 +69,9 @@ export function ExportBar(): JSX.Element {
       </div>
       {exportError && (
         <p className="text-sm text-red-600 dark:text-red-400">Export failed: {exportError}</p>
+      )}
+      {exportSuccess && (
+        <p className="text-sm text-emerald-600 dark:text-emerald-400">{exportSuccess}</p>
       )}
     </div>
   );

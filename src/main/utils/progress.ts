@@ -10,7 +10,7 @@
 import { PROGRESS_PERCENTAGE_INTERVAL, PROGRESS_UPDATE_FREQUENCY } from '@shared/constants';
 
 export interface ProgressCallback {
-  (current: number, total: number): void;
+  (current: number, total: number, currentPath?: string): void;
 }
 
 export class ProgressReporter {
@@ -37,18 +37,24 @@ export class ProgressReporter {
    * Increment progress and report if a threshold is crossed.
    *
    * @param count - Amount to increment. Default 1.
+   * @param currentPath - Path of the item currently being processed.
    */
-  update(count = 1): void {
+  update(count = 1, currentPath?: string): void {
+    const previous = this.current;
     this.current += count;
 
     if (this.total !== null && this.total > 0) {
-      const percent = Math.floor((this.current / this.total) * 100);
-      if (percent - this.lastReported >= PROGRESS_PERCENTAGE_INTERVAL) {
-        this.lastReported = percent;
-        this.onUpdate?.(this.current, this.total);
+      const currentPercent = Math.floor((this.current / this.total) * 100);
+      if (currentPercent - this.lastReported >= PROGRESS_PERCENTAGE_INTERVAL) {
+        this.lastReported = currentPercent;
+        this.onUpdate?.(this.current, this.total, currentPath);
       }
-    } else if (this.current % PROGRESS_UPDATE_FREQUENCY === 0) {
-      this.onUpdate?.(this.current, 0);
+    } else {
+      const previousChunk = Math.floor(previous / PROGRESS_UPDATE_FREQUENCY);
+      const currentChunk = Math.floor(this.current / PROGRESS_UPDATE_FREQUENCY);
+      if (currentChunk > previousChunk) {
+        this.onUpdate?.(this.current, 0, currentPath);
+      }
     }
   }
 

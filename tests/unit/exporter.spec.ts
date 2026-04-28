@@ -115,6 +115,25 @@ describe('exportResults', () => {
     expect(content).toContain('/test/photos');
   });
 
+  it('escapes csv fields with quotes and commas once', async () => {
+    const result = makeScanResult('csv');
+    const [dir] = result.directories as DirectoryInfo[];
+    const mutated: ScanResult = {
+      ...result,
+      directories: [
+        {
+          ...dir,
+          path: '/test/a,"quoted" path',
+        },
+      ],
+    };
+
+    await exportResults(mutated, 'csv', TMP_FILE);
+
+    const content = await readFile(TMP_FILE, 'utf-8');
+    expect(content).toContain('"/test/a,""quoted"" path",5000');
+  });
+
   it('exports json format', async () => {
     const result = makeScanResult('json');
     await exportResults(result, 'json', TMP_FILE);

@@ -5,6 +5,9 @@
   "compilerOptions": {
     "ignoreDeprecations": "6.0",
     "composite": true,
+    "noEmit": true,
+    "outDir": "./.tsc-root/main",
+    "tsBuildInfoFile": "./.tsc-root/tsconfig.main.tsbuildinfo",
     "jsx": "preserve",
     "lib": ["ES2020"],
     "baseUrl": ".",

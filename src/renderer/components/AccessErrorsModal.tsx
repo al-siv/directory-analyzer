@@ -31,6 +31,9 @@ export function AccessErrorsModal(): JSX.Element | null {
     >
       <div
         className="flex max-h-[80vh] w-full max-w-lg flex-col rounded-lg border border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="access-errors-title"
         onClick={e => {
           e.stopPropagation();
         }}
@@ -38,7 +41,9 @@ export function AccessErrorsModal(): JSX.Element | null {
         <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-slate-700">
           <div className="flex items-center gap-2">
             <ShieldAlert className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-            <h3 className="text-sm font-semibold">Access Errors</h3>
+            <h3 id="access-errors-title" className="text-sm font-semibold">
+              Access Errors
+            </h3>
             <span className="rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900 dark:text-amber-300">
               {errors.length}
             </span>

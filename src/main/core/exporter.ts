@@ -21,6 +21,10 @@ import { bytesToHumanReadable, formatPercentage } from '@main/utils/format';
  * @param outputPath - Absolute path for the output file.
  * @returns Promise that resolves when the file is written.
  * @throws {Error} If the format is unsupported or writing fails.
+ *
+ * @precondition scanResult must be a valid ScanResult with populated statistics.
+ * @precondition outputPath must be an absolute, writable file path.
+ * @postcondition A file exists at outputPath containing the formatted export.
  */
 export async function exportResults(
   scanResult: ScanResult,
@@ -49,6 +53,10 @@ export async function exportResults(
 /**
  * Build a human-readable text report.
  */
+function calculatePercentage(bytes: number, total: number): number {
+  return total > 0 ? (bytes / total) * 100 : 0;
+}
+
 function generateTextExport(result: ScanResult): string {
   const stats = result.statistics;
   const lines: string[] = [];
@@ -75,11 +83,9 @@ function generateTextExport(result: ScanResult): string {
   lines.push('Directory Listing (sorted by size):');
   lines.push('-'.repeat(60));
 
-  const totalSize = result.directories.reduce((s, d) => s + d.sizeBytes, 0);
-
   for (let i = 0; i < result.directories.length; i++) {
     const d = result.directories[i];
-    const pct = totalSize > 0 ? (d.sizeBytes / totalSize) * 100 : 0;
+    const pct = calculatePercentage(d.sizeBytes, stats.totalSizeBytes);
     const pctStr = formatPercentage(pct);
     lines.push(
       `${String(i + 1).padStart(4)}. ${bytesToHumanReadable(d.sizeBytes).padStart(8)} (${pctStr.padStart(6)}) - ${d.path} (${d.fileCount.toLocaleString()} files)`
@@ -94,7 +100,7 @@ function generateTextExport(result: ScanResult): string {
     const sortedCats = Object.entries(stats.categoryBreakdown).sort((a, b) => b[1] - a[1]);
     for (const [cat, sizeBytes] of sortedCats) {
       if (sizeBytes <= 0) continue;
-      const pct = totalSize > 0 ? (sizeBytes / totalSize) * 100 : 0;
+      const pct = calculatePercentage(sizeBytes, stats.totalSizeBytes);
       const pctStr = formatPercentage(pct);
       const fc = stats.fileCountByCategory[cat] ?? 0;
       lines.push(
@@ -110,11 +116,21 @@ function generateTextExport(result: ScanResult): string {
  * Build a CSV export.
  */
 function escapeCsvField(value: string): string {
+  let sanitized = value;
   // Prefix formula-triggering characters to prevent CSV injection in spreadsheet software.
   if (/^[\u003D+\-@\t\r]/.test(value)) {
-    return `"'${value}"`;
+    sanitized = `'${value}`;
   }
-  return value;
+  // RFC 4180: quote if contains comma, double-quote, or newline.
+  if (
+    sanitized.includes('"') ||
+    sanitized.includes(',') ||
+    sanitized.includes('\n') ||
+    sanitized.includes('\r')
+  ) {
+    return `"${sanitized.replace(/"/g, '""')}"`;
+  }
+  return sanitized;
 }
 
 function generateCsvExport(result: ScanResult): string {
@@ -130,14 +146,12 @@ function generateCsvExport(result: ScanResult): string {
 
   lines.push('Rank,Path,Size (bytes),Size (HR),Percentage,File Count');
 
-  const totalSize = result.directories.reduce((s, d) => s + d.sizeBytes, 0);
-
   for (let i = 0; i < result.directories.length; i++) {
     const d = result.directories[i];
-    const pct = totalSize > 0 ? (d.sizeBytes / totalSize) * 100 : 0;
+    const pct = calculatePercentage(d.sizeBytes, stats.totalSizeBytes);
     const pctStr = formatPercentage(pct);
     lines.push(
-      `${String(i + 1)},"${escapeCsvField(d.path)}",${String(d.sizeBytes)},${bytesToHumanReadable(d.sizeBytes)},${pctStr},${String(d.fileCount)}`
+      `${String(i + 1)},${escapeCsvField(d.path)},${String(d.sizeBytes)},${escapeCsvField(bytesToHumanReadable(d.sizeBytes))},${escapeCsvField(pctStr)},${String(d.fileCount)}`
     );
   }
 
@@ -149,7 +163,6 @@ function generateCsvExport(result: ScanResult): string {
  */
 function generateJsonExport(result: ScanResult): string {
   const stats = result.statistics;
-  const totalSize = result.directories.reduce((s, d) => s + d.sizeBytes, 0);
 
   const contentAnalysis: Record<
     string,
@@ -158,7 +171,7 @@ function generateJsonExport(result: ScanResult): string {
 
   for (const [cat, sizeBytes] of Object.entries(stats.categoryBreakdown)) {
     if (sizeBytes <= 0) continue;
-    const pct = totalSize > 0 ? (sizeBytes / totalSize) * 100 : 0;
+    const pct = calculatePercentage(sizeBytes, stats.totalSizeBytes);
     contentAnalysis[cat] = {
       sizeBytes,
       percentage: Number(pct.toFixed(2)),
@@ -172,7 +185,7 @@ function generateJsonExport(result: ScanResult): string {
       targetPath: result.scanOptions.targetPath,
       totalDirectories: stats.totalDirectories,
       totalFiles: stats.totalFiles,
-      totalSizeBytes: totalSize,
+      totalSizeBytes: stats.totalSizeBytes,
       totalSizeHuman: bytesToHumanReadable(stats.totalSizeBytes),
       scanDuration: stats.scanDuration,
       errorCount: result.errorCount,
@@ -182,7 +195,7 @@ function generateJsonExport(result: ScanResult): string {
           : 0,
     },
     directories: result.directories.map((d, idx) => {
-      const pct = totalSize > 0 ? (d.sizeBytes / totalSize) * 100 : 0;
+      const pct = calculatePercentage(d.sizeBytes, stats.totalSizeBytes);
       return {
         rank: idx + 1,
         path: d.path,

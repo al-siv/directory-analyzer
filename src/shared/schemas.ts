@@ -23,13 +23,14 @@ export const ScanOptionsSchema = z.object({
   includeHidden: z.boolean(),
   minSizeBytes: z.number().int().min(0),
   topCount: z.number().int().min(1).max(10000),
-  outputFormat: z.enum(['text', 'csv', 'json']),
+  outputFormat: z.enum(['text', 'csv', 'json']).optional(),
   extensionFilter: z
     .array(
       z
         .string()
         .min(1)
-        .regex(/^[a-zA-Z0-9_-]+$/, {
+        .trim()
+        .regex(/^\.?[a-zA-Z0-9_-]+$/, {
           message: 'Invalid extension format',
         })
     )

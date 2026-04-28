@@ -48,6 +48,9 @@ export function bytesToHumanReadable(sizeBytes: number): string {
  * @returns Formatted percentage string.
  */
 export function formatPercentage(percentage: number): string {
+  if (percentage === 0) {
+    return '0.00%';
+  }
   if (percentage < MINIMUM_PERCENTAGE_DISPLAY) {
     return `<${MINIMUM_PERCENTAGE_DISPLAY.toFixed(2)}%`;
   }

@@ -25,9 +25,17 @@ import {
 } from '@main/utils/fs';
 import { ProgressReporter } from '@main/utils/progress';
 import { cpus } from 'os';
+import {
+  MAX_SCAN_DEPTH,
+  MAX_SCAN_DIRECTORIES,
+  MAX_SCAN_FILE_RECORDS,
+  MIN_SCAN_WORKERS,
+  SCAN_TIMEOUT_MS,
+} from '@shared/constants';
+import { logger } from '@main/utils/logger';
 
 /** Maximum concurrent async tasks for parallel scanning. */
-const MAX_WORKERS = Math.max(1, cpus().length);
+const MAX_WORKERS = Math.max(MIN_SCAN_WORKERS, cpus().length);
 
 interface ScanDirectoryResult {
   dirInfo: DirectoryInfo;
@@ -35,12 +43,19 @@ interface ScanDirectoryResult {
 }
 
 /**
- * Thrown when a scan is cancelled by the user.
+ * Thrown when a scan is cancelled.
  */
 export class ScanCancelledError extends Error {
-  constructor() {
-    super('Scan cancelled by user');
+  public readonly reason: string;
+  public readonly processedDirectories: number;
+  public readonly elapsedMs: number;
+
+  constructor(reason = 'user', processedDirectories = 0, elapsedMs = 0) {
+    super(`Scan cancelled (${reason})`);
     this.name = 'ScanCancelledError';
+    this.reason = reason;
+    this.processedDirectories = processedDirectories;
+    this.elapsedMs = elapsedMs;
   }
 }
 
@@ -48,9 +63,6 @@ export class ScanCancelledError extends Error {
  * Orchestrates directory traversal, file classification, and result aggregation.
  */
 export class DirectoryScanner {
-  private static readonly SCAN_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
-  private static readonly MAX_FILES_LIMIT = 1_000_000;
-
   private readonly options: ScanOptions;
   private readonly classifier: ContentClassifier;
   private readonly errorDirectories: string[] = [];
@@ -73,16 +85,19 @@ export class DirectoryScanner {
    * @param onProgress - Optional callback invoked with progress updates.
    * @returns ScanResult with sorted directories and statistics.
    * @throws {ScanCancelledError} If the scan is aborted.
+   *
+   * @precondition this.options.targetPath must be an absolute, accessible directory path.
+   * @postcondition Returns a ScanResult with directories sorted by size descending.
    */
   async scan(
     useParallel = true,
-    onProgress?: (current: number, total: number) => void
+    onProgress?: (current: number, total: number, currentPath?: string) => void
   ): Promise<ScanResult> {
     this.abortController = new AbortController();
     const signal = this.abortController.signal;
     this.scanTimeoutId = setTimeout(() => {
       this.abortController?.abort();
-    }, DirectoryScanner.SCAN_TIMEOUT_MS);
+    }, SCAN_TIMEOUT_MS);
 
     const startTime = Date.now();
 
@@ -138,12 +153,15 @@ export class DirectoryScanner {
 
   /**
    * Collect every directory under the root iteratively (avoids stack overflow).
+   *
+   * @precondition rootPath must be an absolute, accessible directory path.
+   * @postcondition Returns a list of all directory paths under rootPath, limited by maxDepth and maxDirectories.
    */
   private async collectAllDirectories(
     rootPath: string,
     signal: AbortSignal,
-    maxDepth = 50,
-    maxDirectories = 1_000_000
+    maxDepth = MAX_SCAN_DEPTH,
+    maxDirectories = MAX_SCAN_DIRECTORIES
   ): Promise<string[]> {
     const dirs: string[] = [rootPath];
     const stack: Array<{ path: string; depth: number }> = [{ path: rootPath, depth: 0 }];
@@ -166,8 +184,7 @@ export class DirectoryScanner {
       }
 
       try {
-        const subdirs = await getSubdirectoryPaths(current, this.options.includeHidden);
-        for (const sub of subdirs) {
+        for await (const sub of getSubdirectories(current, this.options.includeHidden)) {
           const full = join(current, sub);
           try {
             const realFull = await realpath(full);
@@ -175,14 +192,18 @@ export class DirectoryScanner {
               continue;
             }
             visited.add(realFull);
-          } catch {
-            // If realpath fails, fall back to the raw path and continue.
+          } catch (err) {
+            logger.warn({
+              event: 'scanner:realpath-failed',
+              path: full,
+              error: err instanceof Error ? err.message : String(err),
+            });
           }
           dirs.push(full);
           stack.push({ path: full, depth: depth + 1 });
         }
       } catch {
-        this.errorDirectories.push(current);
+        this.recordAccessError(current);
       }
     }
 
@@ -201,14 +222,14 @@ export class DirectoryScanner {
 
     for (const dirPath of dirPaths) {
       if (signal.aborted) {
-        throw new ScanCancelledError();
+        throw new ScanCancelledError('user', results.length, 0);
       }
 
       const { dirInfo } = await this.scanSingleDirectory(dirPath);
       if (dirInfo.sizeBytes >= this.options.minSizeBytes) {
         results.push(dirInfo);
       }
-      reporter.update();
+      reporter.update(1, dirPath);
     }
 
     return results;
@@ -233,13 +254,13 @@ export class DirectoryScanner {
 
     const processOne = async (dirPath: string): Promise<void> => {
       if (signal.aborted) {
-        throw new ScanCancelledError();
+        throw new ScanCancelledError('user', results.length, 0);
       }
       const { dirInfo } = await this.scanSingleDirectory(dirPath);
       if (dirInfo.sizeBytes >= this.options.minSizeBytes) {
         results.push(dirInfo);
       }
-      reporter.update();
+      reporter.update(1, dirPath);
     };
 
     while (queue.length > 0 || inFlight.size > 0) {
@@ -266,13 +287,16 @@ export class DirectoryScanner {
 
   /**
    * Scan a single directory: sum direct file sizes, classify files, apply filters.
+   *
+   * @precondition dirPath must be an absolute directory path.
+   * @postcondition Returns a ScanDirectoryResult with aggregated file info and category breakdown.
    */
   private async scanSingleDirectory(dirPath: string): Promise<ScanDirectoryResult> {
     const scanTime = Date.now();
 
     const isAccessible = await isAccessibleDirectory(dirPath);
     if (!isAccessible) {
-      this.errorDirectories.push(dirPath);
+      this.recordAccessError(dirPath);
       return {
         dirInfo: {
           path: dirPath,
@@ -309,7 +333,7 @@ export class DirectoryScanner {
 
         const fileInfo = this.classifier.classifyFileWithInfo(filePath, fileSize);
         directoryFiles.push(fileInfo);
-        if (this.allFiles.length < DirectoryScanner.MAX_FILES_LIMIT) {
+        if (this.allFiles.length < MAX_SCAN_FILE_RECORDS) {
           this.allFiles.push(fileInfo);
         }
         this.totalFiles += 1;
@@ -317,7 +341,7 @@ export class DirectoryScanner {
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      this.errorDirectories.push(dirPath);
+      this.recordAccessError(dirPath);
       return {
         dirInfo: {
           path: dirPath,
@@ -373,6 +397,12 @@ export class DirectoryScanner {
       fileCountByCategory: this.classifier.getFileCountByCategory(this.allFiles),
     };
   }
+
+  private recordAccessError(dirPath: string): void {
+    if (!this.errorDirectories.includes(dirPath)) {
+      this.errorDirectories.push(dirPath);
+    }
+  }
 }
 
 /**
@@ -381,15 +411,4 @@ export class DirectoryScanner {
 function getExtension(fileName: string): string {
   const idx = fileName.lastIndexOf('.');
   return idx >= 0 ? fileName.slice(idx).toLowerCase() : '';
-}
-
-/**
- * Helper: list subdirectory names in a directory.
- */
-async function getSubdirectoryPaths(parent: string, includeHidden: boolean): Promise<string[]> {
-  const names: string[] = [];
-  for await (const name of getSubdirectories(parent, includeHidden)) {
-    names.push(name);
-  }
-  return names;
 }

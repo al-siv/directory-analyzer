@@ -16,8 +16,10 @@ import { DirectoryScanner, ScanCancelledError } from '@main/core/scanner';
 import { exportResults } from '@main/core/exporter';
 import { resolve, isAbsolute, normalize } from 'path';
 import { stat } from 'fs/promises';
+import { createScanLogger, generateSessionId } from '@main/utils/logger';
 
 let activeScanner: DirectoryScanner | null = null;
+let activeScanId: string | null = null;
 
 /**
  * Register all IPC handlers.
@@ -34,10 +36,18 @@ export function registerIpcHandlers(): void {
     const validated = await validateScanOptions(options);
     activeScanner = new DirectoryScanner(validated);
 
+    const sessionId = generateSessionId();
+    activeScanId = sessionId;
+    const scanLogger = createScanLogger(sessionId);
+    scanLogger.info('scan:start', { targetPath: validated.targetPath, options: validated });
+
     const window = BrowserWindow.fromWebContents(event.sender);
 
     try {
-      const result = await activeScanner.scan(true, (current, total) => {
+      const result = await activeScanner.scan(true, (current, total, currentPath) => {
+        if (activeScanId !== sessionId) {
+          return;
+        }
         if (!window || window.isDestroyed()) {
           activeScanner?.cancel();
           return;
@@ -45,24 +55,38 @@ export function registerIpcHandlers(): void {
         window.webContents.send(IPC_CHANNELS.SCAN_PROGRESS, {
           current,
           total,
-          currentPath: '',
+          currentPath: currentPath ?? '',
         });
       });
 
+      scanLogger.info('scan:complete', {
+        totalDirectories: result.statistics.totalDirectories,
+        totalFiles: result.statistics.totalFiles,
+        duration: result.scanDuration,
+      });
       return { success: true, result };
     } catch (err) {
       if (err instanceof ScanCancelledError) {
-        return { success: false, error: 'Scan cancelled by user' };
+        scanLogger.warn('scan:cancelled', {
+          reason: err.reason,
+          processedDirectories: err.processedDirectories,
+          elapsedMs: err.elapsedMs,
+        });
+        return { success: false, cancelled: true, error: 'Scan cancelled by user' };
       }
+      scanLogger.error('scan:failed', { error: err instanceof Error ? err.message : String(err) });
       return { success: false, error: err instanceof Error ? err.message : String(err) };
     } finally {
-      activeScanner = null;
+      if (activeScanId === sessionId) {
+        activeScanner = null;
+        activeScanId = null;
+      }
     }
   });
 
   ipcMain.handle(IPC_CHANNELS.SCAN_CANCEL, () => {
     activeScanner?.cancel();
-    activeScanner = null;
+    return { success: true };
   });
 
   ipcMain.handle(IPC_CHANNELS.EXPORT_RESULTS, async (_event, payload: unknown) => {
@@ -90,7 +114,7 @@ export function registerIpcHandlers(): void {
     });
 
     if (!filePath) {
-      return { success: false, error: 'Save dialog cancelled' };
+      return { success: false, cancelled: true };
     }
 
     try {
@@ -143,15 +167,6 @@ export function registerIpcHandlers(): void {
   });
 }
 
-/**
- * Validate and sanitize ScanOptions received from the renderer.
- *
- * @description Prevents path traversal by resolving paths and ensuring
- *              they stay within allowed boundaries.
- * @param options - Raw options from the renderer.
- * @returns Sanitized ScanOptions.
- * @throws {Error} If validation fails.
- */
 /**
  * Validate and sanitize ScanOptions received from the renderer.
  *

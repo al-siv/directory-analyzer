@@ -11,6 +11,7 @@ test.describe('Directory Analyzer E2E', () => {
     const window = await electronApp.firstWindow();
     await expect(window.locator('text=Directory Analyzer')).toBeVisible();
     await expect(window.locator('text=Browse')).toBeVisible();
+    await expect(window.getByRole('button', { name: /scan/i })).toBeDisabled();
 
     await electronApp.close();
   });

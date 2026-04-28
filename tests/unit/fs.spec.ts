@@ -41,6 +41,11 @@ describe('fs utilities', () => {
       expect(files).toContain('root.txt');
       expect(files).not.toContain('subdir1');
     });
+
+    it('throws when directory cannot be listed', async () => {
+      const iterator = getDirectFiles('/definitely/does/not/exist');
+      await expect(iterator.next()).rejects.toThrow();
+    });
   });
 
   describe('getSubdirectories', () => {
@@ -61,6 +66,11 @@ describe('fs utilities', () => {
       }
       expect(dirs).toContain('visible');
       expect(dirs).not.toContain('.hidden');
+    });
+
+    it('throws when subdirectories cannot be listed', async () => {
+      const iterator = getSubdirectories('/definitely/does/not/exist', true);
+      await expect(iterator.next()).rejects.toThrow();
     });
   });
 

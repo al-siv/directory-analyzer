@@ -39,3 +39,6 @@ jobs:
 
       - name: Build
         run: pnpm run build
+
+      - name: E2E smoke tests
+        run: pnpm exec playwright test

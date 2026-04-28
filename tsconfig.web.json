@@ -12,6 +12,9 @@
   "compilerOptions": {
     "ignoreDeprecations": "6.0",
     "composite": true,
+    "noEmit": true,
+    "outDir": "./.tsc-root/web",
+    "tsBuildInfoFile": "./.tsc-root/tsconfig.web.tsbuildinfo",
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {

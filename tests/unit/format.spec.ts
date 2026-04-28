@@ -45,8 +45,8 @@ describe('formatPercentage', () => {
     expect(formatPercentage(18.146)).toBe('18.15%');
   });
 
-  it('shows sub-threshold as <0.01%', () => {
-    expect(formatPercentage(0)).toBe('<0.01%');
+  it('shows 0.00% for zero and <0.01% for tiny values', () => {
+    expect(formatPercentage(0)).toBe('0.00%');
     expect(formatPercentage(0.005)).toBe('<0.01%');
   });
 });

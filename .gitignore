@@ -71,4 +71,6 @@ playwright/.cache/
 
 # Generated JS and declaration files in src/
 src/**/*.js
-src/**/*.d.ts
+src/shared/**/*.d.ts
+src/renderer/**/*.d.ts
+src/preload/**/*.d.ts

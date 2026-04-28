@@ -10,6 +10,8 @@
 import { stat, readdir } from 'fs/promises';
 import { basename, join } from 'path';
 import { platform } from 'os';
+import { WINDOWS_FILE_ATTRIBUTE_HIDDEN, WINDOWS_INVALID_FILE_ATTRIBUTES } from '@shared/constants';
+import { logger } from './logger';
 
 let koffiModule: typeof import('koffi') | undefined;
 let getFileAttributesW: ((path: Buffer) => number) | undefined;
@@ -53,11 +55,10 @@ export function isHiddenDirectory(dirPath: string): boolean {
 
   if (getFileAttributesW !== undefined) {
     try {
-      const FILE_ATTRIBUTE_HIDDEN = 0x00000002;
       const buf = Buffer.from(dirPath + '\0', 'utf16le');
       const attrs = getFileAttributesW(buf);
-      if (attrs !== 0xffffffff) {
-        return (attrs & FILE_ATTRIBUTE_HIDDEN) !== 0;
+      if (attrs !== WINDOWS_INVALID_FILE_ATTRIBUTES) {
+        return (attrs & WINDOWS_FILE_ATTRIBUTE_HIDDEN) !== 0;
       }
     } catch {
       // Fall through to dot-prefix check.
@@ -77,7 +78,12 @@ export async function isAccessibleDirectory(dirPath: string): Promise<boolean> {
   try {
     await readdir(dirPath);
     return true;
-  } catch {
+  } catch (err) {
+    logger.warn({
+      event: 'fs:directory-inaccessible',
+      path: dirPath,
+      error: err instanceof Error ? err.message : String(err),
+    });
     return false;
   }
 }
@@ -94,7 +100,12 @@ export async function safeGetFileSize(filePath: string): Promise<number> {
   try {
     const s = await stat(filePath);
     return s.isFile() ? s.size : 0;
-  } catch {
+  } catch (err) {
+    logger.warn({
+      event: 'fs:file-size-unavailable',
+      path: filePath,
+      error: err instanceof Error ? err.message : String(err),
+    });
     return 0;
   }
 }
@@ -108,18 +119,11 @@ export async function safeGetFileSize(filePath: string): Promise<number> {
  * @returns Async generator of file names (not full paths).
  */
 export async function* getDirectFiles(directory: string): AsyncGenerator<string> {
-  try {
-    const entries = await readdir(directory, { withFileTypes: true });
-    for (const entry of entries) {
-      if (entry.isFile()) {
-        yield entry.name;
-      }
+  const entries = await readdir(directory, { withFileTypes: true });
+  for (const entry of entries) {
+    if (entry.isFile()) {
+      yield entry.name;
     }
-  } catch (err) {
-    console.warn(
-      `[fs] Failed to list files in "${directory}":`,
-      err instanceof Error ? err.message : String(err)
-    );
   }
 }
 
@@ -134,19 +138,12 @@ export async function* getSubdirectories(
   directory: string,
   includeHidden: boolean
 ): AsyncGenerator<string> {
-  try {
-    const entries = await readdir(directory, { withFileTypes: true });
-    for (const entry of entries) {
-      if (entry.isDirectory()) {
-        if (includeHidden || !isHiddenDirectory(join(directory, entry.name))) {
-          yield entry.name;
-        }
+  const entries = await readdir(directory, { withFileTypes: true });
+  for (const entry of entries) {
+    if (entry.isDirectory()) {
+      if (includeHidden || !isHiddenDirectory(join(directory, entry.name))) {
+        yield entry.name;
       }
     }
-  } catch (err) {
-    console.warn(
-      `[fs] Failed to list subdirectories in "${directory}":`,
-      err instanceof Error ? err.message : String(err)
-    );
   }
 }

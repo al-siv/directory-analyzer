@@ -39,15 +39,19 @@ export function useScan(): {
       includeHidden: s.includeHidden,
       minSizeBytes: s.minSizeMb * 1024 * 1024,
       topCount: s.topCount,
-      outputFormat: 'text',
       extensionFilter: extFilter.length > 0 ? extFilter : null,
     };
 
     const response = await window.electronAPI.scanStart(options);
 
     if (!response.success) {
-      s.setError(response.error ?? 'Unknown error');
-      s.setAppState('error');
+      if (response.cancelled) {
+        s.setError(null);
+        s.setAppState('idle');
+      } else {
+        s.setError(response.error ?? 'Unknown error');
+        s.setAppState('error');
+      }
       s.setProgress(null);
     } else if (response.result) {
       s.setScanResult(response.result);
@@ -57,7 +61,11 @@ export function useScan(): {
   }, []);
 
   const cancelScan = useCallback(() => {
-    window.electronAPI.scanCancel();
+    const s = useScanStore.getState();
+    s.setProgress(null);
+    s.setError(null);
+    s.setAppState('idle');
+    void window.electronAPI.scanCancel();
   }, []);
 
   return { startScan, cancelScan };
